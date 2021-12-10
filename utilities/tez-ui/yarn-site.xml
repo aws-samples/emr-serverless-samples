@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. See accompanying LICENSE file.
+-->
+<configuration>
+    <property>
+        <name>yarn.timeline-service.hostname</name>
+        <value>0.0.0.0</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.bind-host</name>
+        <value>0.0.0.0</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>0.0.0.0</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.bind-host</name>
+        <value>0.0.0.0</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.http-cross-origin.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.http-cross-origin.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.version</name>
+        <value>1.5</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.store-class</name>
+        <value>org.apache.hadoop.yarn.server.timeline.EntityGroupFSTimelineStore</value>
+    </property>
+    <property>
+        <name>APPLICATION_ID</name>
+        <value>APPLICATION_ID</value>
+    </property>
+    <property>
+        <name>JOB_RUN_ID</name>
+        <value>JOB_RUN_ID</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.entity-group-fs-store.active-dir</name>
+        <value>file:////tmp/timeline-data/${JOB_RUN_ID}/active</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.entity-group-fs-store.done-dir</name>
+        <value>file:////tmp/timeline-data/${JOB_RUN_ID}/done</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.entity-group-fs-store.group-id-plugin-classes</name>
+        <value>org.apache.tez.dag.history.logging.ats.TimelineCachePluginImpl</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.entity-group-fs-store.summary-store</name>
+        <value>org.apache.hadoop.yarn.server.timeline.RollingLevelDBTimelineStore</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.ttl-enable</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.entity-group-fs-store.scan-interval-seconds</name>
+        <value>10</value>
+    </property>
+</configuration>
