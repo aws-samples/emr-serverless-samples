@@ -2,6 +2,7 @@ FROM 755674844232.dkr.ecr.us-east-1.amazonaws.com/spark/emr-6.4.0
 
 LABEL org.opencontainers.image.source https://github.com/aws-samples/emr-serverless-samples
 LABEL org.opencontainers.image.url https://github.com/aws-samples/emr-serverless-samples/tree/main/utilities/spark-ui
+LABEL org.opencontainers.image.documentation https://github.com/aws-samples/emr-serverless-samples/blob/main/utilities/spark-ui/README.md
 
 USER root
 RUN ln -s /usr/share/aws/aws-java-sdk/aws-java-sdk-bundle-*.jar /usr/lib/spark/jars/

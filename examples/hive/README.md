@@ -169,7 +169,7 @@ aws s3 cp s3://${S3_BUCKET}/hive-logs/applications/$APPLICATION_ID/jobs/$JOB_RUN
 
 - Get credentials
 
-- Set LOG_DIR
+- Set S3_LOG_URI
 
 ```shell
 export S3_LOG_URI=s3://${S3_BUCKET}/hive-logs

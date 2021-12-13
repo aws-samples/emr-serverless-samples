@@ -1,0 +1,10 @@
+# Python artifacts
+__pycache__/
+.venv/
+build/
+dist/
+*.egg-info/
+
+# macOS detritus
+.DS_Store
+
