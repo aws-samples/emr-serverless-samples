@@ -1,14 +1,11 @@
-FROM maven:3.6-amazoncorretto-8
-FROM 895885662937.dkr.ecr.us-west-2.amazonaws.com/spark/emr-6.3.0
+FROM 755674844232.dkr.ecr.us-east-1.amazonaws.com/spark/emr-6.4.0
+
+LABEL org.opencontainers.image.source https://github.com/aws-samples/emr-serverless-samples
+LABEL org.opencontainers.image.url https://github.com/aws-samples/emr-serverless-samples/tree/main/utilities/spark-ui
 
 USER root
-
-WORKDIR /tmp/
-ADD pom.xml /tmp
-
-COPY --from=0 /usr/share/maven /usr/share/maven
-RUN /usr/share/maven/bin/mvn dependency:tree
-RUN /usr/share/maven/bin/mvn dependency:copy-dependencies -DoutputDirectory=/usr/lib/spark/jars/
+RUN ln -s /usr/share/aws/aws-java-sdk/aws-java-sdk-bundle-*.jar /usr/lib/spark/jars/
+RUN ln -s /usr/share/aws/emr/emrfs/lib/emrfs-hadoop-assembly-*.jar /usr/lib/spark/jars/
 
 RUN mkdir /mnt/s3 \
     && chown spark:spark /mnt/s3
