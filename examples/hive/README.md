@@ -45,7 +45,7 @@ aws emr-serverless create-application \
             }
         },
         "TEZ_TASK": {
-            "workerCount": 50,
+            "workerCount": 10,
             "resourceConfiguration": {
                 "cpu": "4vCPU",
                 "memory": "8GB",
@@ -55,7 +55,8 @@ aws emr-serverless create-application \
     }' \
     --maximum-capacity '{
         "cpu": "400vCPU",
-        "memory": "1024GB"
+        "memory": "1024GB",
+        "disk": "1000GB"
     }'
 ```
 
@@ -165,7 +166,7 @@ aws s3 cp s3://${S3_BUCKET}/hive-logs/applications/$APPLICATION_ID/jobs/$JOB_RUN
 
 ## Tez UI Debugging
 
-- Follow the steps in building the Docker container
+- (Optional) Follow the steps in [building the Tez UI Docker container](/utilities/tez-ui/)
 
 - Get credentials
 
@@ -182,5 +183,7 @@ docker run --rm -it \
     -p 8088:8088 -p 8188:8188 -p 9999:9999 \
     -e AWS_REGION -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
     -e S3_LOG_URI -e JOB_RUN_ID -e APPLICATION_ID \
-    emr/tezui
+    ghcr.io/aws-samples/emr-serverless-tez-ui:latest
 ```
+
+- Open the Tez UI at http://localhost:9999/tez-ui/

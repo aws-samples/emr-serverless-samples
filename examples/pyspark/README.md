@@ -170,9 +170,13 @@ aws emr-serverless delete-application \
 
 ## Spark UI Debugging
 
-- Follow the steps in building the Docker container
+- (Optional) Follow the steps in [building the Spark UI Docker container](/utilities/spark-ui/)
 
 - Get credentials and set LOG_DIR
+
+```shell
+export LOG_DIR=s3://${S3_BUCKET}/logs/applications/$APPLICfATION_ID/jobs/$JOB_RUN_ID/sparklogs/
+```
 
 - Fire up Docker
 
@@ -183,7 +187,7 @@ docker run --rm -it \
     -e SPARK_HISTORY_OPTS="-Dspark.history.fs.logDirectory=$LOG_DIR -Dspark.hadoop.fs.s3.customAWSCredentialsProvider=com.amazonaws.auth.DefaultAWSCredentialsProviderChain" \
     -e AWS_REGION=us-east-1 \
     -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
-    emr/spark-ui
+    ghcr.io/aws-samples/emr-serverless-spark-ui:latest
 ```
 
 - Access the Spark UI via http://localhost:18080
