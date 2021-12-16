@@ -17,10 +17,10 @@ export S3_BUCKET=<YOUR_BUCKET_NAME>
 export JOB_ROLE_ARN=arn:aws:iam::<ACCOUNT_ID>:role/emr-serverless-job-role
 ```
 
-- First, make sure the `extreme-weather.py` script is uploaded to an S3 bucket in the `us-east-1 region.
+- First, make sure the `extreme_weather.py` script is uploaded to an S3 bucket in the `us-east-1 region.
 
 ```shell
-aws s3 cp extreme-weather.py s3://${S3_BUCKET}/code/pyspark/
+aws s3 cp extreme_weather.py s3://${S3_BUCKET}/code/pyspark/
 ```
 
 - Now, let's create and start an Application on EMR Serverless. Applications are where you submit jobs and are associated with a specific open source framework and release version. For this application, we'll configure [pre-initialized capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity-api.html) to ensure this application can begin running jobs immediately.
@@ -105,7 +105,7 @@ aws emr-serverless start-job-run \
     --execution-role-arn $JOB_ROLE_ARN \
     --job-driver '{
         "sparkSubmit": {
-            "entryPoint": "s3://'${S3_BUCKET}'/code/pyspark/extreme-weather.py",
+            "entryPoint": "s3://'${S3_BUCKET}'/code/pyspark/extreme_weather.py",
             "sparkSubmitParameters": "--conf spark.driver.cores=1 --conf spark.driver.memory=3g --conf spark.executor.cores=4 --conf spark.executor.memory=3g --conf spark.executor.instances=10"
         }
     }' \
