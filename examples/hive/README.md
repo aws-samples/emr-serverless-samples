@@ -117,7 +117,7 @@ aws emr-serverless start-job-run \
                 "properties": {
                     "hive.driver.cores": "2",
                     "hive.driver.memory": "4g",
-                    "hive.tez.container.size": "8gb",
+                    "hive.tez.container.size": "8192",
                     "hive.tez.cpu.vcores": "4"
                 }
             }
