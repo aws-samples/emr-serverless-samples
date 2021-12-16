@@ -164,6 +164,22 @@ Or copy the stdout of the job.
 aws s3 cp s3://${S3_BUCKET}/hive-logs/applications/$APPLICATION_ID/jobs/$JOB_RUN_ID/HIVE_DRIVER/stdout.gz - | gunzip
 ```
 
+## Clean up
+
+When you're all done, make sure to call `stop-application` to decommission your capacity and `delete-application` if you're all done.
+
+
+```shell
+aws emr-serverless stop-application \
+    --application-id $APPLICATION_ID
+```
+
+
+```shell
+aws emr-serverless delete-application \
+    --application-id $APPLICATION_ID
+```
+
 ## Tez UI Debugging
 
 - (Optional) Follow the steps in [building the Tez UI Docker container](/utilities/tez-ui/)
