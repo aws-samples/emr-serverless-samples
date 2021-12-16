@@ -16,6 +16,7 @@
 -- SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 SET hive.cli.print.header=true;
+SET hive.query.name=ExtremeWeather;
 
 WITH noaa_year_data AS (
     SELECT

@@ -179,7 +179,8 @@ export S3_LOG_URI=s3://${S3_BUCKET}/hive-logs
 - Fire up Docker
 
 ```shell
-docker run --rm -it \
+docker run --rm -d \
+    --name emr-serverless-tez-ui \
     -p 8088:8088 -p 8188:8188 -p 9999:9999 \
     -e AWS_REGION -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
     -e S3_LOG_URI -e JOB_RUN_ID -e APPLICATION_ID \
@@ -187,3 +188,9 @@ docker run --rm -it \
 ```
 
 - Open the Tez UI at http://localhost:9999/tez-ui/
+
+- When you're done, stop the Docker image
+
+```shell
+docker stop emr-serverless-tez-ui
+```
