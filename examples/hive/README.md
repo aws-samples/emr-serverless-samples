@@ -182,13 +182,15 @@ aws emr-serverless delete-application \
 
 ## Tez UI Debugging
 
-- (Optional) Follow the steps in [building the Tez UI Docker container](/utilities/tez-ui/)
+- (Optional) Follow the steps in [building the Tez UI Docker container](/utilities/tez-ui/) to build the container locally
 
-- Get credentials
-
-- Set S3_LOG_URI
+- Get credentials and set S3_LOG_URI
 
 ```shell
+export AWS_ACCESS_KEY_ID=AKIAaaaa
+export AWS_SECRET_ACCESS_KEY=bbbb
+export AWS_SESSION_TOKEN=yyyy
+
 export S3_LOG_URI=s3://${S3_BUCKET}/hive-logs
 ```
 
