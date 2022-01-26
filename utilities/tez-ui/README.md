@@ -8,9 +8,11 @@ You can use this Docker image to start the Tez UI and Application Timeline Serve
 
 ## Build Docker image
 
-You can either build this Docker image yourself, or use the public image here: `ghcr.io/aws-samples/emr-serverless-tez-ui:latest`
-
-1. Download the files in the `tez-ui` directory from the GitHub repository.
+1. Clone this repository and change into the `utilities/tez-ui` directory.
+```shell
+git clone https://github.com/aws-samples/emr-serverless-samples.git
+cd emr-serverless-samples/utilities/spark-ui/
+```
 2. Build the image
 ```shell
 docker build -t emr/tez-ui .

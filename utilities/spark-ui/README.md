@@ -8,9 +8,11 @@ You can use this Docker image to start the Apache Spark History Server (SHS) and
 
 ## Build Docker image
 
-You can either build this Docker image yourself, or use the public image here: `ghcr.io/aws-samples/emr-serverless-spark-ui:latest`
-
-1. Download the Dockerfile in the `spark-ui` directory from the GitHub repository.
+1. Clone this repository and change into the `utilities/spark-ui` directory.
+```shell
+git clone https://github.com/aws-samples/emr-serverless-samples.git
+cd emr-serverless-samples/utilities/spark-ui/
+```
 2. Login to ECR
 ```shell
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 755674844232.dkr.ecr.us-east-1.amazonaws.com

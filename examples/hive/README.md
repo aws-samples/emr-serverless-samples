@@ -182,7 +182,7 @@ aws emr-serverless delete-application \
 
 ## Tez UI Debugging
 
-- (Optional) Follow the steps in [building the Tez UI Docker container](/utilities/tez-ui/) to build the container locally
+- Follow the steps in [building the Tez UI Docker container](/utilities/tez-ui/) to build the container locally
 
 - Get credentials and set S3_LOG_URI
 
@@ -202,7 +202,7 @@ docker run --rm -d \
     -p 8088:8088 -p 8188:8188 -p 9999:9999 \
     -e AWS_REGION -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
     -e S3_LOG_URI -e JOB_RUN_ID -e APPLICATION_ID \
-    ghcr.io/aws-samples/emr-serverless-tez-ui:latest
+    emr/tez-ui
 ```
 
 - Open the Tez UI at http://localhost:9999/tez-ui/
