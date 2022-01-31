@@ -25,8 +25,6 @@ aws s3 cp extreme_weather.py s3://${S3_BUCKET}/code/pyspark/
 
 - Now, let's create and start an Application on EMR Serverless. Applications are where you submit jobs and are associated with a specific open source framework and release version. For this application, we'll configure [pre-initialized capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity-api.html) to ensure this application can begin running jobs immediately.
 
-_ℹ️ Please note that leaving a pre-initialized application running WILL incur costs in your AWS Account._
-
 ```shell
 aws emr-serverless create-application \
   --type SPARK \
