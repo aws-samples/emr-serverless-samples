@@ -57,9 +57,9 @@ This will return information about your application. In this case, we've created
 
 ```json
 {
-    "applicationId": "00et0dhmhuokmr09",
-    "arn": "arn:aws:emr-serverless:us-east-1:123456789012:/applications/00et0dhmhuokmr09",
-    "name": "serverless-demo"
+  "applicationId": "00et0dhmhuokmr09",
+  "arn": "arn:aws:emr-serverless:us-east-1:123456789012:/applications/00et0dhmhuokmr09",
+  "name": "serverless-demo"
 }
 ```
 
@@ -118,9 +118,9 @@ aws emr-serverless start-job-run \
 
 ```json
 {
-    "applicationId": "00esprurjpeqpq09",
-    "arn": "arn:aws:emr-serverless:us-east-1:123456789012:/applications/00esprurjpeqpq09/jobruns/00esps8ka2vcu801",
-    "jobRunId": "00esps8ka2vcu801"
+  "applicationId": "00esprurjpeqpq09",
+  "arn": "arn:aws:emr-serverless:us-east-1:123456789012:/applications/00esprurjpeqpq09/jobruns/00esps8ka2vcu801",
+  "jobRunId": "00esps8ka2vcu801"
 }
 ```
 
@@ -154,12 +154,10 @@ aws s3 cp s3://${S3_BUCKET}/logs/applications/$APPLICfATION_ID/jobs/$JOB_RUN_ID/
 
 When you're all done, make sure to call `stop-application` to decommission your capacity and `delete-application` if you're all done.
 
-
 ```shell
 aws emr-serverless stop-application \
     --application-id $APPLICATION_ID
 ```
-
 
 ```shell
 aws emr-serverless delete-application \
@@ -198,4 +196,30 @@ docker run --rm -d \
 
 ```shell
 docker stop emr-serverless-spark-ui
+```
+
+## Using the AWS Glue Data Catalog with EMR Serverless
+
+You can use the Glue Data Catalog along with SparkSQL in EMR Serverless by setting the proper Hive metastore config item.
+
+You can do this when creating a new SparkSession in your PySpark code - make sure you also call `enableHiveSupport()`.
+
+```python
+from pyspark.sql import SparkSession
+
+spark = (
+    SparkSession.builder.appName("SparkSQL")
+    .config(
+        "hive.metastore.client.factory.class",
+        "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory",
+    )
+    .enableHiveSupport()
+    .getOrCreate()
+)
+
+# We can query tables with SparkSQL
+spark.sql("SHOW TABLES").show()
+
+# Or we can also them with native Spark code
+print(spark.catalog.listTables())
 ```
