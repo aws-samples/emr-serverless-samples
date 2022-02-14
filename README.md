@@ -98,6 +98,14 @@ aws iam put-role-policy --role-name emr-serverless-job-role --policy-name GlueAc
 
   This sample script shows how to use EMR Serverless to run a PySpark job that analyzes data from the open [NOAA Global Surface Summary of Day](https://registry.opendata.aws/noaa-gsod/) dataset.
 
+- [Python Dependencies](/examples/pyspark/dependencies/README.md)
+
+  Shows how to package Python dependencies ([Great Expectations](https://greatexpectations.io/)) using a [Virtualenv](https://virtualenv.pypa.io/en/latest/) and [`venv-pack`](https://jcristharif.com/venv-pack/).
+
+- [Genomics analysis using Glow](/examples/pyspark/genomic/README.md)
+
+  This sample shows how to use EMR Serverless to combine both Python and Java dependencies in order to run genomic analysis using [Glow](https://projectglow.io/) and [1000 Genomes](https://registry.opendata.aws/1000-genomes/).
+
 - [EMR Serverless Hive query](/examples/hive/README.md)
 
   This sample script shows how to use Hive in EMR Serverless to query the same NOAA data.
