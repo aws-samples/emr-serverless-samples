@@ -2,7 +2,7 @@
 
 Some customers may want to use [Glow](https://glow.readthedocs.io/en/latest/index.html) to work with genomic data.
 
-This is an example of how to package Glow dependencies and run a job on EMR Serverless.
+This is an example of how to package Glow dependencies and run a job on EMR Serverless using [1000 Genomes](https://registry.opendata.aws/1000-genomes/) data.
 
 ## Getting Started
 
