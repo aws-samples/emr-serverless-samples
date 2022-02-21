@@ -11,7 +11,7 @@ You can use this Docker image to start the Tez UI and Application Timeline Serve
 1. Clone this repository and change into the `utilities/tez-ui` directory.
 ```shell
 git clone https://github.com/aws-samples/emr-serverless-samples.git
-cd emr-serverless-samples/utilities/spark-ui/
+cd emr-serverless-samples/utilities/tez-ui/
 ```
 2. Build the image
 ```shell
@@ -25,7 +25,7 @@ You can use a pair of AWS access key and secret key, or temporary AWS credential
 1. Set a few environment variables relevant to your job.
 
 ```shell
-export S3_LOG_URI=s3://${S3_BUCKET}/logs
+export S3_LOG_URI=s3://${S3_BUCKET}/hive-logs
 export APPLICATION_ID=001122334455
 export JOB_RUN_ID=667788990011
 ```
@@ -48,4 +48,4 @@ docker run --rm -it \
     emr/tez-ui
 ```
 
-4. Access the Tez UI via http://localhost:8088
+4. Access the Tez UI via http://localhost:9999/tez-ui/
