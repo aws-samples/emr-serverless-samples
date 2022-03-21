@@ -4,6 +4,18 @@ import argparse
 
 
 class EMRServerless:
+    """
+    An example implementation of running a PySpark job on EMR Serverless.
+
+    This class provides support for creating an EMR Serverless Spark application, running a job,
+    fetching driver logs, and shutting the application back down.
+
+    By default, all calls are synchronous in that they wait for the Application to reach the desired state.
+    - `create_application` waits for the application to reach the `CREATED` state.
+    - `start_application` waits for the `STARTED` state.
+    - `stop_application` waits for the `STOPPED state.
+    - `run_spark_job` waits until the job is in a terminal state.
+    """
     def __init__(self, application_id: str = None) -> None:
         self.application_id = application_id
         self.s3_log_prefix = "emr-serverless-logs"

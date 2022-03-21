@@ -38,7 +38,7 @@ python3 -c 'import boto3; import pprint; pprint.pprint(boto3.client("emr-serverl
 
 ## Example Python API Usage
 
-The script show below will:
+The script shown below will:
 
 - Create a new EMR Serverless Application
 - Start a new Spark job with a sample `wordcount` application
