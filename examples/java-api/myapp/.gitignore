@@ -4,4 +4,5 @@
 # Package Files #
 *.jar
 target/
+dependency-reduced-pom.xml
 
