@@ -22,37 +22,52 @@ import software.amazon.awssdk.services.emrserverless.model.SparkSubmit.Builder;
  */
 @Command(name = "myapp", mixinStandardHelpOptions = true, version = "1.0")
 public class App implements Callable<Integer> {
-    @Option(scope = CommandLine.ScopeType.INHERIT, description = "The bucket to use for output and logs. Example: \"emr-demo-us-east-1\"", required = true, names = {
-            "-b", "--bucket" })
-    protected String bucket;
+    // @formatter:off
+    @Option(
+        names = { "-b", "--bucket" },
+        scope = CommandLine.ScopeType.INHERIT,
+        description = "The bucket to use for output and logs. Example: \"emr-demo-us-east-1\"",
+        required = true
+    ) protected String bucket;
 
-    @Option(names = { "-r",
-            "--role-arn" }, scope = CommandLine.ScopeType.INHERIT, description = "The role ARN to use when running the Spark job."
+    @Option(
+        names = { "-r", "--role-arn" },
+        scope = CommandLine.ScopeType.INHERIT,
+        description = "The role ARN to use when running the Spark job."
                     +
-                    " Example: \"arn:aws:iam::123456789012:role/emr-serverless-job-role\"", required = true)
-    protected String roleArn;
+                    " Example: \"arn:aws:iam::123456789012:role/emr-serverless-job-role\"",
+        required = true
+    ) protected String roleArn;
 
-    @Option(names = { "-sc",
-            "--spark-conf" }, scope = CommandLine.ScopeType.INHERIT, description = "The Spark configuration parameters."
+    @Option(
+        names = { "-sc", "--spark-conf" },
+        scope = CommandLine.ScopeType.INHERIT,
+        description = "The Spark configuration parameters."
                     +
                     " Defaults to '--class org.apache.spark.examples.SparkPi --conf spark.executor.cores=1 --conf spark.executor.memory=4g --conf"
                     +
-                    " spark.driver.cores=1 --conf spark.driver.memory=4g --conf spark.executor.instances=1'.")
+                    " spark.driver.cores=1 --conf spark.driver.memory=4g --conf spark.executor.instances=1'."
+    )
     protected String sparkParams = "--class org.apache.spark.examples.SparkPi --conf spark.executor.cores=1 --conf spark.executor.memory=4g --conf "
             +
             "spark.driver.cores=1 --conf spark.driver.memory=4g --conf spark.executor.instances=1";
 
-    @Option(names = { "-sa",
-            "--spark-args" }, scope = CommandLine.ScopeType.INHERIT, description = "A comma-seperated list of arguments for the spark job."
+    @Option(
+        names = { "-sa", "--spark-args" },
+        scope = CommandLine.ScopeType.INHERIT,
+        description = "A comma-seperated list of arguments for the spark job."
                     +
-                    " Defaults to `10`")
-    protected String sparkArgs = "10";
+                    " Defaults to `10`"
+    ) protected String sparkArgs = "10";
 
-    @Option(names = { "-ep",
-            "--entry-point" }, scope = CommandLine.ScopeType.INHERIT, description = "The entrypoint for the spark job."
+    @Option(
+        names = { "-ep", "--entry-point" },
+        scope = CommandLine.ScopeType.INHERIT,
+        description = "The entrypoint for the spark job."
                     +
-                    " (Defaults to `local:///usr/lib/spark/examples/jars/spark-examples.jar`")
-    protected String entryPoint = "local:///usr/lib/spark/examples/jars/spark-examples.jar";
+                    " (Defaults to `local:///usr/lib/spark/examples/jars/spark-examples.jar`"
+    ) protected String entryPoint = "local:///usr/lib/spark/examples/jars/spark-examples.jar";
+    // @formatter:on
 
     @Override
     public Integer call() {
