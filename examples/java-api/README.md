@@ -6,6 +6,7 @@ In it, we use a new maven project with the latest preview jar for EMR Serverless
 
 ## Pre-requisites
 
+- Maven 3
 - Access to [EMR Serverless Preview](https://pages.awscloud.com/EMR-Serverless-Preview.html)
 - An Amazon S3 bucket in the `us-east-1` region
 - A preview version of EMR Serverless Java SDK jar

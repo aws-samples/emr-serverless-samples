@@ -42,29 +42,24 @@ public class App implements Callable<Integer> {
     @Option(
         names = { "-sc", "--spark-conf" },
         scope = CommandLine.ScopeType.INHERIT,
-        description = "The Spark configuration parameters."
-                    +
-                    " Defaults to '--class org.apache.spark.examples.SparkPi --conf spark.executor.cores=1 --conf spark.executor.memory=4g --conf"
-                    +
+        description = "The Spark configuration parameters." +
+                    " Defaults to '--class org.apache.spark.examples.SparkPi --conf spark.executor.cores=1 --conf spark.executor.memory=4g --conf" +
                     " spark.driver.cores=1 --conf spark.driver.memory=4g --conf spark.executor.instances=1'."
     )
-    protected String sparkParams = "--class org.apache.spark.examples.SparkPi --conf spark.executor.cores=1 --conf spark.executor.memory=4g --conf "
-            +
+    protected String sparkParams = "--class org.apache.spark.examples.SparkPi --conf spark.executor.cores=1 --conf spark.executor.memory=4g --conf " +
             "spark.driver.cores=1 --conf spark.driver.memory=4g --conf spark.executor.instances=1";
 
     @Option(
         names = { "-sa", "--spark-args" },
         scope = CommandLine.ScopeType.INHERIT,
-        description = "A comma-seperated list of arguments for the spark job."
-                    +
+        description = "A comma-seperated list of arguments for the spark job." +
                     " Defaults to `10`"
     ) protected String sparkArgs = "10";
 
     @Option(
         names = { "-ep", "--entry-point" },
         scope = CommandLine.ScopeType.INHERIT,
-        description = "The entrypoint for the spark job."
-                    +
+        description = "The entrypoint for the spark job." +
                     " (Defaults to `local:///usr/lib/spark/examples/jars/spark-examples.jar`"
     ) protected String entryPoint = "local:///usr/lib/spark/examples/jars/spark-examples.jar";
     // @formatter:on
