@@ -110,6 +110,13 @@ aws iam put-role-policy --role-name emr-serverless-job-role --policy-name GlueAc
 
   This sample script shows how to use Hive in EMR Serverless to query the same NOAA data.
 
+### SDK Usage
+
+During the preview, additional artifacts are required in order to access the EMR Serverless API. The examples below show how to do this.
+
+- [EMR Serverless boto3 example](/examples/python-api/README.md)
+- [EMR Serverless Java SDK example](/examples/java-api/README.md)
+
 ## Utilities
 
 - [Spark UI](/utilities/spark-ui/)
