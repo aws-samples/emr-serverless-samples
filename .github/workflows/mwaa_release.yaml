@@ -10,7 +10,7 @@ jobs:
       - name: Build zip
         run: |
           cd airflow
-          zip ../plugins.zip emr_serverless/*/*.py
+          zip ../plugins.zip emr_serverless/*/*.py setup.py
       - name: Download preview artifacts
         run: |
           curl -O https://elasticmapreduce.s3.amazonaws.com/emr-serverless-preview/artifacts/latest/dev/sdk/python-cli.zip
