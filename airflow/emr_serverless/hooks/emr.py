@@ -16,25 +16,25 @@
 # specific language governing permissions and limitations
 # under the License.
 from time import sleep
-from typing import Dict, Optional
+from typing import Any, Dict, Optional, Set
+
+from botocore.config import Config
+from botocore.exceptions import ClientError
 
 from airflow.exceptions import AirflowException
 from airflow.providers.amazon.aws.hooks.base_aws import AwsBaseHook
-from botocore.exceptions import ClientError
 
 
 class EmrServerlessHook(AwsBaseHook):
     """
-    Interact with Amazon EMR Serverless to create Applications, run and poll jobs,
-    and return job status.
-    """
-    client_type = 'emr-serverless'
+    Interact with EMR Serverless API.
 
-    # Jobs can only be submitted to an application once it is in one of these states
-    APPLICATION_READY_STATES = (
-        "CREATED",
-        "STARTED",
-    )
+    Additional arguments (such as ``aws_conn_id``) may be specified and
+    are passed down to the underlying AwsBaseHook.
+
+    .. seealso::
+        :class:`~airflow.providers.amazon.aws.hooks.base_aws.AwsBaseHook`
+    """
 
     JOB_RUN_INTERMEDIATE_STATES = (
         "SUBMITTED",
@@ -47,86 +47,198 @@ class EmrServerlessHook(AwsBaseHook):
         "CANCELLED",
         "CANCELLING",
     )
-    JOB_RUN_SUCCESS_STATES = (
-        "SUCCESS",
-    )
+    JOB_RUN_SUCCESS_STATES = ("SUCCESS",)
     JOB_RUN_TERMINAL_STATES = JOB_RUN_SUCCESS_STATES + JOB_RUN_FAILURE_STATES
-    
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(client_type="emr-serverless", *args, **kwargs)
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        kwargs["client_type"] = "emr-serverless"
+        kwargs["config"] = Config(user_agent_extra="EMRServerlessAirflowOperator/0.0.2")
+        super().__init__(*args, **kwargs)
 
-    def create_application(
-        self,
-        name: str,
-        releaseLabel: str,
-        applicationType: str,
-        initialCapacityConfig: Optional[Dict] = None,
-        tags: Optional[Dict] = None,
-        **kwargs,
+    def create_serverless_application(
+        self, client_request_token: str, release_label: str, job_type: str, **kwargs
     ) -> Dict:
         """
-        Creates an EMR Serverless Application.
+        Create an EMR serverless application.
+
+        :param client_request_token: The client idempotency token of the application to create.
+          Its value must be unique for each request.
+        :param release_label: The EMR release version associated with the application.
+        :param job_type: Type of application
+        :raises Exception: Exception from boto3 API call
+        :returns: Response object from boto3 API call
         """
-        emr_serverless_client = self.conn
 
-        response = emr_serverless_client.create_application(
-            name=name, releaseLabel=releaseLabel, type=applicationType,
-            # TODO: Add in additional config items
-        )
-        self.application_id = response.get('id')
+        try:
+            return self.conn.create_application(
+                clientToken=client_request_token,
+                releaseLabel=release_label,
+                type=job_type,
+                **kwargs,
+            )
+        except Exception as ex:
+            self.log.error(f"Exception while creating application: {ex}")
+            raise Exception("Error creating application")
 
-        self.log.info("Created Amazon EMR Serverless application with the name %s.", response.get('name'))
-        return response
-    
-    def submit_job_run(
+    def get_application_status(self, application_id: str) -> str:
+        """
+        Returns the state of a given application.
+
+        :param application_id: ID of the application to check
+        :returns: Current state of the application
+        """
+
+        try:
+            response = self.conn.get_application(applicationId=application_id)
+            return response["application"]["state"]
+        except Exception as ex:
+            self.log.error(f"Exception while getting application state: {ex}")
+            raise Exception("Error getting application state")
+
+    def start_serverless_application(self, application_id: str) -> None:
+        """
+        Start an EMR Serverless application.
+
+        :param application_id: ID of the application to be deleted.
+        :raises AirflowException: Exception from boto3 API call.
+        """
+
+        try:
+            self.conn.start_application(applicationId=application_id)
+        except Exception as ex:
+            self.log.error(f"Exception while starting application: {ex}")
+            raise Exception("Error starting application")
+
+    def stop_serverless_application(self, application_id: str) -> None:
+        """
+        Stop an EMR Serverless application.
+
+        :param application_id: ID of the application to be deleted.
+        :raises AirflowException: Exception from boto3 API call.
+        """
+
+        try:
+            self.conn.stop_application(applicationId=application_id)
+        except Exception as ex:
+            self.log.error(f"Exception while stopping application: {ex}")
+            raise Exception("Error stopping application")
+
+    def delete_serverless_application(self, application_id: str) -> Dict:
+        """
+        Delete an EMR Serverless application.
+
+        :param application_id: ID of the application to be deleted.
+        :raises AirflowException: Exception from boto3 API call.
+        """
+
+        try:
+            return self.conn.delete_application(applicationId=application_id)
+        except Exception as ex:
+            self.log.error(f"Exception while deleting application: {ex}")
+            raise Exception("Error deleting application")
+
+    def start_serverless_job(
+        self,
+        client_request_token: str,
+        application_id: str,
+        execution_role_arn: str,
+        job_driver: dict,
+        configuration_overrides: Optional[dict],
+    ) -> Dict:
+        """
+        Starts an EMR Serverless job on a created application.
+
+        :param application_id: ID of the EMR Serverless application to start.
+        :param execution_role_arn: ARN of role to perform action.
+        :param job_driver: Driver that the job runs on.
+        :param configuration_overrides: Configuration specifications to override existing configurations.
+        :param client_request_token: The client idempotency token of the application to create.
+          Its value must be unique for each request.
+        :raises AirflowException: Exception from boto3 API call.
+        :returns: Response object from boto3 API call.
+        """
+
+        if self.get_application_status(application_id=application_id) not in {
+            "CREATED",
+            "STARTING",
+        }:
+            self.conn.start_application(applicationId=application_id)
+
+        try:
+            return self.conn.start_job_run(
+                clientToken=client_request_token,
+                applicationId=application_id,
+                executionRoleArn=execution_role_arn,
+                jobDriver=job_driver,
+                configurationOverrides=configuration_overrides,
+            )
+        except Exception as ex:
+            self.log.error(f"Exception while starting job: {ex}")
+            raise Exception("Error while starting job")
+
+    def get_serverless_job_status(self, application_id: str, job_run_id: str) -> str:
+        try:
+            return self.conn.get_job_run(
+                applicationId=application_id, jobRunId=job_run_id
+            )["jobRun"]["state"]
+        except Exception as ex:
+            self.log.error(f"Exception while getting job state: {ex}")
+            raise Exception("Error getting job state")
+
+    def get_serverless_job_state_details(
+        self, application_id: str, job_run_id: str
+    ) -> Optional[str]:
+        """
+        Fetch the reason for a job failure (e.g. error message). Returns None or reason string.
+
+        :param application_id: Application Id
+        :param job_id: Id of submitted job run
+        :return: str
+        """
+        # We absorb any errors if we can't retrieve the job status
+        reason = None
+
+        try:
+            response = self.conn.describe_job_run(
+                applicationId=application_id,
+                jobRunId=job_run_id,
+            )
+            reason = response["jobRun"]["stateDetails"]
+        except KeyError:
+            self.log.error("Could not get status of the EMR Serverless job")
+        except ClientError as ex:
+            self.log.error("AWS request failed, check logs for more info: %s", ex)
+
+        return reason
+
+    def wait_for_application_state(
+        self,
+        application_id: str,
+        desired_states: Set,
+        max_tries: Optional[int] = None,
+        pollInterval: int = 5,
+    ) -> None:
+        try_number = 0
+
+        while True:
+            state = self.get_application_status(application_id=application_id)
+            if state in desired_states:
+                break
+            try_number += 1
+            if max_tries and try_number >= max_tries:
+                raise Exception("Application did not reach desired state")
+            sleep(pollInterval)
+
+    def poll_job_state(
         self,
         applicationId: str,
-        jobRole: str,
-        jobDriver: Dict,
-        configurationOverrides: Optional[Dict],
-        client_request_token: Optional[str] = None,
-    ) -> str:
-        """
-        Submits a job to an Amazon EMR Serverless application
-        """
-        emr_serverless_client = self.conn
-
-        params = {
-            "applicationId": applicationId,
-            "executionRoleArn": jobRole,
-            "jobDriver": jobDriver,
-            "configurationOverrides": configurationOverrides,
-        }
-        if client_request_token:
-            params["clientToken"] = client_request_token
-
-        response = emr_serverless_client.start_job_run(**params)
-        return response.get('jobRunId')
-    
-    def get_job_state(self, applicationId: str, jobRunId: str) -> Optional[str]:
-        try:
-            response = self.conn.get_job_run(
-                applicationId=applicationId,
-                jobRunId=jobRunId,
-            )
-            return response['jobRun']['state']
-        except self.conn.exceptions.ResourceNotFoundException:
-            # If the job is not found, we raise an exception as something fatal has happened.
-            raise AirflowException(f'Job ID {jobRunId} not found on Application {jobRunId}')
-        except ClientError as ex:
-            # If we receive a generic ClientError, we swallow the exception so that the
-            # calling client has to make another request.
-            self.log.error('AWS request failed, check logs for more info: %s', ex)
-            return None
-    
-    def poll_job_state(
-        self, applicationId: str, jobId: str, maxTries: Optional[int] = None, pollInterval: int = 30
+        jobId: str,
+        maxTries: Optional[int] = None,
+        pollInterval: int = 30,
     ) -> Optional[str]:
         """
         Poll the state of submitted job run until query state reaches a final state.
         Returns one of the final states.
-
         :param application_id: Application Id where the job runs
         :param job_id: Id of submitted job run
         :param max_tries: Number of times to poll for query state before function exits
@@ -134,33 +246,31 @@ class EmrServerlessHook(AwsBaseHook):
         :return: str
         """
         try_number = 1
-        final_query_state = None  # Query state when query reaches final state or max_tries reached
+        final_query_state = (
+            None  # Query state when query reaches final state or max_tries reached
+        )
 
         while True:
-            query_state = self.get_job_state(applicationId, jobId)
+            query_state = self.get_serverless_job_status(applicationId, jobId)
             if query_state is None:
                 self.log.info("Try %s: Invalid query state. Retrying again", try_number)
             elif query_state in self.JOB_RUN_TERMINAL_STATES:
-                self.log.info("Try %s: Query execution completed. Final state is %s", try_number, query_state)
+                self.log.info(
+                    "Try %s: Query execution completed. Final state is %s",
+                    try_number,
+                    query_state,
+                )
                 final_query_state = query_state
                 break
             else:
-                self.log.info("Try %s: Query is still in non-terminal state - %s", try_number, query_state)
+                self.log.info(
+                    "Try %s: Query is still in non-terminal state - %s",
+                    try_number,
+                    query_state,
+                )
             if maxTries and try_number >= maxTries:  # Break loop if max_tries reached
                 final_query_state = query_state
                 break
             try_number += 1
             sleep(pollInterval)
         return final_query_state
-
-    def stop_query(self, application_id: str, job_id: str) -> Dict:
-        """
-        Cancel the submitted job_run
-
-        :param job_id: Id of submitted job_run
-        :return: dict
-        """
-        return self.conn.cancel_job_run(
-            applicationId=application_id,
-            id=job_id,
-        )

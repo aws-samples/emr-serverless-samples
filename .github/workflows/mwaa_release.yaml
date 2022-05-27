@@ -11,19 +11,9 @@ jobs:
         run: |
           cd airflow
           zip ../mwaa_plugin.zip emr_serverless/*/*.py setup.py
-      - name: Download preview artifacts
-        run: |
-          curl -O https://elasticmapreduce.s3.amazonaws.com/emr-serverless-preview/artifacts/latest/dev/sdk/python-cli.zip
-          unzip python-cli.zip botocore-1.24.18-py3-none-any.whl boto3-1.21.18-py3-none-any.whl
-      - name: Validate preview artifacts
-        run: |
-          echo 'a89ce0666dce4ae3c5e9064717ef8375fa319790  boto3-1.21.18-py3-none-any.whl'    | shasum -c
-          echo '55ee550e78c2415ecaa93554caf5136c112bc798  botocore-1.24.18-py3-none-any.whl' | shasum -c
       - name: Archive zip results
         uses: actions/upload-artifact@v2
         with:
           name: build-artifacts
           path: |
             mwaa_plugin.zip
-            botocore-1.24.18-py3-none-any.whl
-            boto3-1.21.18-py3-none-any.whl
