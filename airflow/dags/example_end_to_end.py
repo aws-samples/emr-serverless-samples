@@ -33,7 +33,7 @@ with DAG(
     application_id = create_app.output
 
     job1 = EmrServerlessStartJobOperator(
-        task_id="start_job_2",
+        task_id="start_job_1",
         application_id=application_id,
         execution_role_arn=JOB_ROLE_ARN,
         job_driver={
