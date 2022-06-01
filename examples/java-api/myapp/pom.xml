@@ -16,7 +16,7 @@
       <dependency>
         <groupId>software.amazon.awssdk</groupId>
         <artifactId>bom</artifactId>
-        <version>2.17.160</version>
+        <version>2.17.202</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -46,9 +46,8 @@
       <artifactId>url-connection-client</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-emrserverless</artifactId>
-      <version>PREVIEW</version>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>emrserverless</artifactId>
     </dependency>
   </dependencies>
 
