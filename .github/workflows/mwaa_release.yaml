@@ -1,0 +1,19 @@
+name: MWAA Release Artifacts
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build zip
+        run: |
+          cd airflow
+          zip ../mwaa_plugin.zip emr_serverless/*/*.py setup.py
+      - name: Archive zip results
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-artifacts
+          path: |
+            mwaa_plugin.zip
