@@ -10,9 +10,9 @@ For full details about using EMR Serverless, please see the [EMR Serverless docu
 
 _These demos assume you are using an Administrator-level role in your AWS account_
 
-1. **Amazon EMR Serverless is currently in preview.** Please follow the sign-up steps at https://pages.awscloud.com/EMR-Serverless-Preview.html to request access.
+1. **Amazon EMR Serverless is now Generally Available!** Check out the console to [Get Started with EMR Serverless](https://console.aws.amazon.com/emr/home#/serverless).
 
-2. Create an Amazon S3 bucket in the us-east-1 region
+2. Create an Amazon S3 bucket in region where you want to use EMR Serverless (we'll assume `us-east-1`).
 
 ```shell
 aws s3 mb s3://BUCKET-NAME --region us-east-1
@@ -20,7 +20,7 @@ aws s3 mb s3://BUCKET-NAME --region us-east-1
 
 3. Create an EMR Serverless execution role (replacing `BUCKET-NAME` with the one you created above)
 
-This role provides both S3 access for specific buckets as well as full read and write access to the Glue Data Catalog.
+This role provides both S3 access for specific buckets as well as read and write access to the Glue Data Catalog.
 
 ```shell
 aws iam create-role --role-name emr-serverless-job-role --assume-role-policy-document '{
@@ -91,6 +91,7 @@ aws iam put-role-policy --role-name emr-serverless-job-role --policy-name GlueAc
   }'
 ```
   
+Now you're ready to go! Check out the examples below.
 
 ## Examples
 
@@ -116,12 +117,14 @@ aws iam put-role-policy --role-name emr-serverless-job-role --policy-name GlueAc
 
 ### SDK Usage
 
-During the preview, additional artifacts are required in order to access the EMR Serverless API. The examples below show how to do this.
+You can call [EMR Serverless APIs](https://docs.aws.amazon.com/emr-serverless/latest/APIReference/Welcome.html) using standard AWS SDKs. The examples below show how to do this.
 
 - [EMR Serverless boto3 example](/examples/python-api/README.md)
 - [EMR Serverless Java SDK example](/examples/java-api/README.md)
 
 ## Utilities
+
+_These UIs are available in the EMR Serverless console, but you can still use them locally if you wish._
 
 - [Spark UI](/utilities/spark-ui/)
 
