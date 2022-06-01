@@ -71,7 +71,7 @@ public class App implements Callable<Integer> {
         // Create and start a Spark application on EMR 6.5.0
         EMRServerlessService emr_serverless = new EMRServerlessService();
         CreateApplicationResponse response = emr_serverless.createApplication("sample-java-app",
-                "emr-6.5.0-preview",
+                "emr-6.6.0",
                 EMRServerlessService.APPLICATION_TYPES.SPARK);
 
         String appId = response.applicationId();

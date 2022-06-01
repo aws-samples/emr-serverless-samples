@@ -171,7 +171,7 @@ if __name__ == "__main__":
     emr_serverless = EMRServerless()
 
     print("Creating and starting EMR Serverless Spark App")
-    emr_serverless.create_application("sample-spark-job", "emr-6.5.0-preview")
+    emr_serverless.create_application("sample-spark-job", "emr-6.6.0")
     emr_serverless.start_application()
     print(emr_serverless)
 

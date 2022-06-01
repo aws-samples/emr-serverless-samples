@@ -29,7 +29,7 @@ aws s3 cp extreme_weather.py s3://${S3_BUCKET}/code/pyspark/
 aws emr-serverless create-application \
   --type SPARK \
   --name serverless-demo \
-  --release-label "emr-6.5.0-preview" \
+  --release-label "emr-6.6.0" \
     --initial-capacity '{
         "DRIVER": {
             "workerCount": 2,

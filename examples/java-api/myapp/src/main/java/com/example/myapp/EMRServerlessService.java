@@ -36,7 +36,6 @@ public class EMRServerlessService {
     private EmrServerlessClient getClient() {
         return EmrServerlessClient.builder()
                 .credentialsProvider(DefaultCredentialsProvider.create())
-                .region(Region.US_EAST_1)
                 .httpClient(UrlConnectionHttpClient.builder().build())
                 .build();
     }
