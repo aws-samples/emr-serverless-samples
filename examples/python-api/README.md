@@ -53,7 +53,7 @@ client = boto3.client("emr-serverless")
 
 # Create Application
 response = client.create_application(
-    name="my-application", releaseLabel="emr-6.5.0-preview", type="SPARK"
+    name="my-application", releaseLabel="emr-6.6.0", type="SPARK"
 )
 
 print(

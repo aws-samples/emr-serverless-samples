@@ -34,7 +34,7 @@ _ℹ️ Please note that leaving a pre-initialized application running WILL incu
 aws emr-serverless create-application \
   --type HIVE \
   --name serverless-demo \
-  --release-label "emr-5.34.0-preview" \
+  --release-label "emr-6.6.0" \
   --initial-capacity '{
         "DRIVER": {
             "workerCount": 1,
