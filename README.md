@@ -94,6 +94,10 @@ aws iam put-role-policy --role-name emr-serverless-job-role --policy-name GlueAc
 
 ## Examples
 
+- [CloudFormation Templates](./cloudformation/README.md)
+
+  Sample templates for creating an EMR Serverless application as well as various dependencies.
+
 - [EMR Serverless PySpark job](/examples/pyspark/README.md)
 
   This sample script shows how to use EMR Serverless to run a PySpark job that analyzes data from the open [NOAA Global Surface Summary of Day](https://registry.opendata.aws/noaa-gsod/) dataset.
