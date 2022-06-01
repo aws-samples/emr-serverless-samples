@@ -99,6 +99,10 @@ Now you're ready to go! Check out the examples below.
 
   Sample templates for creating an EMR Serverless application as well as various dependencies.
 
+- [Airflow Operator](./airflow/README.md)
+
+  Sample DAGs and preview version of the Airflow Operator. Check the [releases page](https://github.com/aws-samples/emr-serverless-samples/releases) for updates.
+
 - [EMR Serverless PySpark job](/examples/pyspark/README.md)
 
   This sample script shows how to use EMR Serverless to run a PySpark job that analyzes data from the open [NOAA Global Surface Summary of Day](https://registry.opendata.aws/noaa-gsod/) dataset.
