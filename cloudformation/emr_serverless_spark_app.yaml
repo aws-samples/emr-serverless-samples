@@ -1,0 +1,42 @@
+# This template is used to update the stack created by canary1_001.yaml
+AWSTemplateFormatVersion: 2010-09-09
+Description: EMR Serverless Application stack
+Resources:
+  SparkApplication:
+    Type: AWS::EMRServerless::Application
+    Properties:
+      Name: spark-3.2
+      ReleaseLabel: emr-6.6.0
+      Type: Spark
+      MaximumCapacity:
+        Cpu: 200 vCPU
+        Memory: 100 GB
+      AutoStartConfiguration:
+        Enabled: true
+      AutoStopConfiguration:
+        Enabled: true
+        IdleTimeoutMinutes: 100
+      InitialCapacity:
+        - Key: Driver
+          Value:
+            WorkerCount: 3
+            WorkerConfiguration:
+              Cpu: 2 vCPU
+              Memory: 3 GB
+              Disk: 21 GB
+        - Key: Executor
+          Value:
+            WorkerCount: 4
+            WorkerConfiguration:
+              Cpu: 1 vCPU
+              Memory: 4 GB
+              Disk: 20 GB
+      Tags:
+        - Key: tag-on-create-key
+          Value: tag-on-create-value
+
+Outputs:
+  ApplicationId:
+    Value: !Ref SparkApplication
+  ApplicationArn:
+    Value: !GetAtt SparkApplication.Arn
