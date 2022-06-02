@@ -1,10 +1,10 @@
 # Python Depedencies
 
-While in preview, EMR Serverless does not fully supporting providing Python dependencies via the `--archives` or `--py-files` flags. Here is an example of how you can package [Great Expectations](https://greatexpectations.io/) and profile a set of sample data.
+You can create isolated Python virtual environments to package multiple Python libraries for a PySpark job. Here is an example of how you can package [Great Expectations](https://greatexpectations.io/) and profile a set of sample data.
 
 ## Pre-requisites
 
-- Access to the [EMR Serverless Preview](https://pages.awscloud.com/EMR-Serverless-Preview.html)
+- Access to [EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/setting-up.html)
 - [Docker](https://www.docker.com/get-started)
 - An S3 bucket in `us-east-1` and an IAM Role to run your EMR Serverless jobs
 
@@ -33,12 +33,7 @@ aws s3 cp pyspark_ge.tar.gz s3://${S3_BUCKET}/artifacts/pyspark/
 
 2. Copy your code
 
-There's a sample `ge_profile.py` script included here. You can use that or if you want to include this in your own code, you'll need to have the following as part of your script after the Spark session has been initialized.
-
-```python
-userFilesDir = [match for match in sys.path if "userFiles" in match][0]
-sys.path.append(f"{userFilesDir}/pyspark_ge.tar.gz/lib/python3.7/site-packages")
-```
+There's a sample `ge_profile.py` script included here.
 
 ```shell
 aws s3 cp ge_profile.py s3://${S3_BUCKET}/code/pyspark/
@@ -47,7 +42,7 @@ aws s3 cp ge_profile.py s3://${S3_BUCKET}/code/pyspark/
 3. Run your job
 
 - `entryPoint` should point to your script on S3
-- `entryPointArguments` defines the virtualenv archive to add to your path and the output location of the Great Expectations profiler
+- `entryPointArguments` defines the output location of the Great Expectations profiler
 - The virtualenv archive is added via the `--archives` parameter
 
 ```shell
@@ -57,8 +52,8 @@ aws emr-serverless start-job-run \
     --job-driver '{
         "sparkSubmit": {
             "entryPoint": "s3://'${S3_BUCKET}'/code/pyspark/ge_profile.py",
-            "entryPointArguments": ["pyspark_ge.tar.gz", "s3://'${S3_BUCKET}'/tmp/ge-profile"],
-            "sparkSubmitParameters": "--conf spark.driver.cores=1 --conf spark.driver.memory=2g --conf spark.executor.cores=3 --conf spark.executor.memory=4g --conf spark.executor.instances=2 --archives=s3://'${S3_BUCKET}'/artifacts/pyspark/pyspark_ge.tar.gz"
+            "entryPointArguments": ["s3://'${S3_BUCKET}'/tmp/ge-profile"],
+            "sparkSubmitParameters": "--conf spark.driver.cores=1 --conf spark.driver.memory=2g --conf spark.executor.cores=3 --conf spark.executor.memory=4g --conf spark.executor.instances=2 --conf spark.archives=s3://'${S3_BUCKET}'/artifacts/pyspark/pyspark_ge.tar.gz#environment --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=./environment/bin/python --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=./environment/bin/python --conf spark.emr-serverless.executorEnv.PYSPARK_PYTHON=./environment/bin/python"
         }
     }' \
     --configuration-overrides '{
