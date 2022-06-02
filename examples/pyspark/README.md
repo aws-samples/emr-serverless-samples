@@ -6,6 +6,8 @@ The script analyzes data from a given year and finds the weather location with t
 
 _ℹ️ Throughout this demo, I utilize environment variables to allow for easy copy/paste_
 
+_⚠️ The included script is only intended to be run in the `us-east-1` region. You can run in other regions by setting up EMR Serverless with a VPC, which may incur additional cost, or copy some sampe data from the `s3://noaa-gsod-pds/2022/` bucket._
+
 ## Setup
 
 _You should have already completed the pre-requisites in this repo's [README](/README.md)._
