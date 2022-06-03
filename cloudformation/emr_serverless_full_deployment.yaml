@@ -4,12 +4,12 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: EMR Serverless full deployment stack
 
 Resources:
-  # S3 BUcket for logs
+  # S3 Bucket for logs
   EMRServerlessLogBucket:
     Type: AWS::S3::Bucket
 
   # IAM resources
-  EMRStudioServiceRole:
+  EMRServerlessJobRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -77,7 +77,7 @@ Resources:
             WorkerCount: 3
             WorkerConfiguration:
               Cpu: 2 vCPU
-              Memory: 3 GB
+              Memory: 4 GB
               Disk: 21 GB
         - Key: Executor
           Value:
@@ -96,6 +96,6 @@ Outputs:
   ApplicationArn:
     Value: !GetAtt SparkApplication.Arn
   JobRoleArn:
-    Value: !GetAtt EMRStudioServiceRole.Arn
+    Value: !GetAtt EMRServerlessJobRole.Arn
   S3Bucket:
     Value: !Ref EMRServerlessLogBucket
