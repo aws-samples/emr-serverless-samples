@@ -20,14 +20,15 @@ DEFAULT_MONITORING_CONFIG = {
 }
 
 with DAG(
-    dag_id="example_emr_serverless_job",
+    dag_id="example_e2e_emrserverless",
     schedule_interval=None,
     start_date=datetime(2021, 1, 1),
     tags=["example"],
     catchup=False,
 ) as dag:
     create_app = EmrServerlessCreateApplicationOperator(
-        task_id="create_spark_app", type="SPARK", release_label="emr-6.5.0-latest"
+        task_id="create_spark_app", job_type="SPARK", release_label="emr-6.5.0-latest",
+        config={"name": "sample-job"}
     )
 
     application_id = create_app.output
