@@ -22,7 +22,7 @@ Resources:
             WorkerCount: 3
             WorkerConfiguration:
               Cpu: 2 vCPU
-              Memory: 3 GB
+              Memory: 4 GB
               Disk: 21 GB
         - Key: Executor
           Value:
