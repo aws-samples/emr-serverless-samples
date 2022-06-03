@@ -19,7 +19,7 @@ import os
 from datetime import datetime
 
 from airflow import DAG
-from emr_serverless.operators.emr import EmrServerlessOperator
+from emr_serverless.operators.emr import EmrServerlessStartJobOperator
 
 APPLICATION_ID = os.getenv("APPLICATION_ID", "00f0abcde4fg0001")
 JOB_ROLE_ARN = os.getenv("JOB_ROLE_ARN", "arn:aws:iam::012345678912:role/emr_serverless_default_role")
@@ -54,7 +54,7 @@ with DAG(
     # JOB_ROLE_ARN = '{{ conn.emr_eks.extra_dejson["job_role_arn"] }}'
 
     # [START howto_operator_emr_serverless_job]
-    job_starter = EmrServerlessOperator(
+    job_starter = EmrServerlessStartJobOperator(
         task_id="start_job",
         application_id=APPLICATION_ID,
         execution_role_arn=JOB_ROLE_ARN,

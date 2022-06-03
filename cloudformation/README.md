@@ -4,6 +4,7 @@ Several templates are included in this repository depending on your use-case.
 
 1. [`emr_serverless_full_deployment.yaml`](./emr_serverless_full_deployment.yaml) EMR Serverless dependencies and Spark application - Creates the necessary IAM roles, an S3 bucket for logging, and a sample Spark 3.2 application.
 2. [`emr_serverless_spark_app.yaml`](./emr_serverless_spark_app.yaml) EMR Serverless Spark application - A simple Spark 3.2 Application with pre-defined capacity
+3. [`mwaa_emr_serverless.yaml`](./mwaa_emr_serverless.yaml) Amazon Managed Workflows for Apache Airflow (MWAA) and EMR Serverless environment - Everything you need to run EMR Serverless jobs in MWAA.
 
 ## Running a sample app
 
