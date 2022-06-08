@@ -35,16 +35,16 @@ aws emr-serverless create-application \
     --initial-capacity '{
         "DRIVER": {
             "workerCount": 2,
-            "resourceConfiguration": {
+            "workerConfiguration": {
                 "cpu": "2vCPU",
                 "memory": "4GB"
             }
         },
         "EXECUTOR": {
             "workerCount": 10,
-            "resourceConfiguration": {
+            "workerConfiguration": {
                 "cpu": "4vCPU",
-                "memory": "4GB"
+                "memory": "8GB"
             }
         }
     }' \
@@ -87,7 +87,7 @@ aws emr-serverless start-application \
 
 Once your application is in `STARTED` state, you can submit jobs.
 
-With [pre-initialized capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity-api.html), you can define a minimum amount of resources that EMR Serverless keeps ready to respond to interactive queries. EMR Serverless will scale your application up as necessary to respond to workloads, but return to the pre-initialized capacity when there is no activity. You can start or stop an application to effectively pause your application so that you are not billed for resources you're not using. If you don't need second-level response times in your workloads, you can use the default capacity and EMR Serverless will decomission all resources when a job is complete and scale back up as more workloads come in.
+With [pre-initialized capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html), you can define a minimum amount of resources that EMR Serverless keeps ready to respond to interactive queries. EMR Serverless will scale your application up as necessary to respond to workloads, but return to the pre-initialized capacity when there is no activity. You can start or stop an application to effectively pause your application so that you are not billed for resources you're not using. If you don't need second-level response times in your workloads, you can use the default capacity and EMR Serverless will decomission all resources when a job is complete and scale back up as more workloads come in.
 
 ## Run your job
 
