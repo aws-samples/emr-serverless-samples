@@ -27,7 +27,7 @@ with DAG(
     catchup=False,
 ) as dag:
     create_app = EmrServerlessCreateApplicationOperator(
-        task_id="create_spark_app", job_type="SPARK", release_label="emr-6.5.0-latest",
+        task_id="create_spark_app", job_type="SPARK", release_label="emr-6.6.0",
         config={"name": "sample-job"}
     )
 
