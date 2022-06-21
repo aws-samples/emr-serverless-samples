@@ -27,10 +27,9 @@ You can use a pair of AWS access key and secret key, or temporary AWS credential
 ```shell
 export APPLICATION_ID=001122334455
 export JOB_RUN_ID=667788990011
-SERVERLESS_EMR_S3_LOG_BUCKET=$S3_BUCKET
 CONTAINER_LOG_BASE_PATH=hive-logs
-export S3_LOG_URI=s3://$SERVERLESS_EMR_S3_LOG_BUCKET/$CONTAINER_LOG_BASE_PATH
-export AWS_CONSOLE_BASE_PATH_URL="https://s3.console.aws.amazon.com/s3/buckets/${SERVERLESS_EMR_S3_LOG_BUCKET}?prefix=${CONTAINER_LOG_BASE_PATH}/applications/${APPLICATION_ID}/jobs/${JOB_RUN_ID}"
+export S3_LOG_URI=s3://$S3_BUCKET/$CONTAINER_LOG_BASE_PATH
+export AWS_CONSOLE_BASE_PATH_URL="https://s3.console.aws.amazon.com/s3/buckets/${S3_BUCKET}?prefix=${CONTAINER_LOG_BASE_PATH}/applications/${APPLICATION_ID}/jobs/${JOB_RUN_ID}"
 ```
 
 2. Set your AWS access key and secret key, and optionally session token.
