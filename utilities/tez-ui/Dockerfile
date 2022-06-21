@@ -40,9 +40,7 @@ RUN mvn dependency:copy-dependencies -DoutputDirectory=/tmp/tez-ui/ && \
 
 COPY event-log-sync.sh .
 COPY entrypoint.sh /usr/bin/entrypoint.sh
-
 COPY tez-ui.patch /tmp/
-
 
 RUN chmod 744 $ENTRYPOINT
 
