@@ -1,6 +1,6 @@
 # Tez UI
 
-You can use this Docker image to start the Tez UI and Application Timeline Server and view the Tez UI locally.
+You can use this Docker image to start the Tez UI and Application Timeline Server and view the Tez UI locally. 
 
 ## Pre-requisite
 
@@ -20,7 +20,7 @@ docker build -t emr/tez-ui .
 
 ## Start the Tez UI
 
-You can use a pair of AWS access key and secret key, or temporary AWS credentials.
+You can use a pair of AWS access key and secret key, or temporary AWS credentials. This credentials should have access to s3 bucket. If customer enables encryption for the logs stored in s3 bucket, then credentials should have access to KMS key as well.
 
 1. Set a few environment variables relevant to your job.
 
@@ -49,3 +49,14 @@ docker run --rm -it \
 ```
 
 4. Access the Tez UI via http://localhost:9999/tez-ui/
+
+## Troubleshooting
+
+You may get following exception during TEZ UI startup.
+
+1. **Issue/Exception:** com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.services.s3.model.AmazonS3Exception: The ciphertext refers to a customer master key that does not exist, does not exist in this region, or you are not allowed to access. (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied) 
+
+   **Reason:** Given user credentials may not have the access to KMS key which used to encrypt the logs in s3 bucket. Add kms policy with decrypt permission and verify.
+2. **Issue/Exception:**  com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.services.s3.model.AmazonS3Exception: Access Denied (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied) 
+
+   **Reason:** Given user credentials may not have the access s3 bucket. Add s3 policy with read permission and verify.
