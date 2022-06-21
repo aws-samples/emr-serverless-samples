@@ -1,0 +1,37 @@
+--- assets/tez-ui.js
++++ assets/tez-ui.js
+@@ -7011,6 +7011,11 @@
+ 
+       if (logURL) {
+         if (logURL.indexOf("://") === -1) {
++	  if (this.get("env.app.AWS_CONSOLE_BASE_PATH_URL")) {
++		var syslog = "syslog_";
++		var _attemptID = syslog.concat(this.get("entityID")).concat(".gz");
++		return [this.get("env.app.AWS_CONSOLE_BASE_PATH_URL"), logURL].join("/").concat(_attemptID);
++	  }
+           var attemptID = this.get("entityID"),
+               yarnProtocol = this.get('env.app.yarnProtocol');
+           return yarnProtocol + '://' + logURL + '/syslog_' + attemptID;
+@@ -10080,7 +10085,10 @@
+         yarnProtocol = this.get('env.app.yarnProtocol');
+ 
+     if (logURL && logURL.indexOf("://") === -1) {
+-      return yarnProtocol + '://' + logURL;
++     if (this.get("env.app.AWS_CONSOLE_BASE_PATH_URL")) {
++	return [this.get("env.app.AWS_CONSOLE_BASE_PATH_URL"), logURL].join("/");
++     }
++     return yarnProtocol + '://' + logURL;
+     }
+   }
+ 
+@@ -10257,7 +10265,9 @@
+     for (var key in otherinfo) {
+       if (key.indexOf('inProgressLogsURL_') === 0) {
+         var logs = _ember['default'].get(source, 'otherinfo.' + key);
+-        if (logs.indexOf('http') !== 0) {
++        if (this.get("env.app.AWS_CONSOLE_BASE_PATH_URL")) {
++                logs = [this.get("env.app.AWS_CONSOLE_BASE_PATH_URL"), logs].join("/");
++        } else if (logs.indexOf('http') !== 0) {
+           logs = 'http://' + logs;
+         }
+         var attemptID = key.substring(18);

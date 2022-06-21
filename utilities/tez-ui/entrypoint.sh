@@ -63,8 +63,13 @@ bash $HADOOP_BASE_PATH/usr/lib/hadoop-yarn/sbin/yarn-daemon.sh start timelineser
 
 rm -rf hadoop-2.10.1* apache-tez-0.9.2-bin*
 
+mkdir /tmp/tez-ui-files/ && cd /tmp/tez-ui-files/
+jar -xvf $TEZ_HOME/tez-ui*.war
+patch -p0 < /tmp/tez-ui.patch
+sed -i "57 i AWS_CONSOLE_BASE_PATH_URL: \"$AWS_CONSOLE_BASE_PATH_URL\"," config/configs.env
+ 
 mkdir -p /hadoop/usr/lib/tez/logs/
-java -jar $TEZ_HOME/jetty-runner-*.jar --port 9999 --path /tez-ui/ $TEZ_HOME/tez-ui*.war > $TEZ_HOME/logs/tez-ui.log &
+java -jar $TEZ_HOME/jetty-runner-*.jar --port 9999 --path /tez-ui/ /tmp/tez-ui-files/ > $TEZ_HOME/logs/tez-ui.log &
 
 echo "*****************************************************************"
 echo "Launching Tez UI. Access it using: http://localhost:9999/tez-ui/"
