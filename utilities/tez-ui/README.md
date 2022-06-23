@@ -56,7 +56,7 @@ You may get following exception during TEZ UI startup.
 
 1. **Issue/Exception:** com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.services.s3.model.AmazonS3Exception: The ciphertext refers to a customer master key that does not exist, does not exist in this region, or you are not allowed to access. (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied) 
 
-   **Reason:** Given user credentials may not have the access to KMS key which used to encrypt the logs in s3 bucket. Add kms policy with decrypt permission and verify.
+   **Reason:** Given user credentials may not have the access to KMS key which is used to encrypt the logs in the S3 bucket. Add KMS policy with decrypt permission and verify.
 2. **Issue/Exception:**  com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.services.s3.model.AmazonS3Exception: Access Denied (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied) 
 
    **Reason:** Given user credentials may not have the access the S3 bucket. Add S3 policy with read permission and verify.
