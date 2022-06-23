@@ -1,0 +1,9 @@
+FROM maven:3.6-amazoncorretto-8 AS build
+
+WORKDIR /build
+COPY pom.xml .
+
+RUN mvn clean package
+
+FROM scratch AS export
+COPY --from=build /build/target/uber-jars-1.0-SNAPSHOT.jar /

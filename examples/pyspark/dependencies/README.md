@@ -73,3 +73,66 @@ When the job finishes, it will write a `part-00000` file out to `s3://${S3_BUCKE
 aws s3 cp s3://${S3_BUCKET}/tmp/ge-profile/part-00000 ./ge.html
 open ./ge.html
 ```
+
+## PySpark jobs with Java dependencies
+
+Sometimes you need to pull in Java dependencies like Kafka or PostgreSQL libraries. Unfortunately, `spark.jars.packages` will not work at this time so you will need to create a dependency uberjar and upload that to S3.
+
+To do this, we'll create a [`pom.xml`](./pom.xml) that specifies our dependencies and use a [maven Docker container](./Dockerfile.jars) to build the uberjar. In this example, we'll package `org.postgresql:postgresql:42.4.0` and use the example script in [./pg_query.py](./pg_query.py) to query a Postgres database.
+
+> **Note**: The code in `pg_query.py` is for demonstration purposes only - never store credentials directly in your code. 😁
+
+1. Build an uberjar with your dependencies
+
+```shell
+docker build -f Dockerfile.jars --output . .
+```
+
+This will create a `uber-jars-1.0-SNAPSHOT.jar` file locally that you will copy to S3 in the next step.
+
+2. Copy your code and jar
+
+```shell
+aws s3 cp pg_query.py s3://${S3_BUCKET}/code/pyspark/
+aws s3 cp uber-jars-1.0-SNAPSHOT.jar s3://${S3_BUCKET}/code/pyspark/jars/
+```
+
+3. Set the following variables according to your environment.
+
+```shell
+export S3_BUCKET=<YOUR_S3_BUCKET_NAME>
+export APPLICATION_ID=<EMR_SERVERLESS_APPLICATION_ID>
+export JOB_ROLE_ARN=<EMR_SERVERLESS_IAM_ROLE>
+```
+
+4. Start your job with `--jars`
+
+```shell
+aws emr-serverless start-job-run \
+    --name pg-query \
+    --application-id $APPLICATION_ID \
+    --execution-role-arn $JOB_ROLE_ARN \
+    --job-driver '{
+        "sparkSubmit": {
+            "entryPoint": "s3://'${S3_BUCKET}'/code/pyspark/pg_query.py",
+            "sparkSubmitParameters": "--jars s3://'${S3_BUCKET}'/code/pyspark/jars/uber-jars-1.0-SNAPSHOT.jar"
+        }
+    }' \
+    --configuration-overrides '{
+        "monitoringConfiguration": {
+            "s3MonitoringConfiguration": {
+                "logUri": "s3://'${S3_BUCKET}'/logs/"
+            }
+        }
+    }'
+```
+
+5. See the output of your job!
+
+Once your job finishes, you can copy the output locally to view the stdout.
+
+```shell
+export JOB_RUN_ID=<YOUR_JOB_RUN_ID>
+
+aws s3 cp s3://${S3_BUCKET}/logs/applications/${APPLICATION_ID}/jobs/${JOB_RUN_ID}/SPARK_DRIVER/stdout.gz - | gunzip 
+```
