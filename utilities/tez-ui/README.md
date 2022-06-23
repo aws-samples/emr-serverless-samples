@@ -59,4 +59,4 @@ You may get following exception during TEZ UI startup.
    **Reason:** Given user credentials may not have the access to KMS key which used to encrypt the logs in s3 bucket. Add kms policy with decrypt permission and verify.
 2. **Issue/Exception:**  com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.services.s3.model.AmazonS3Exception: Access Denied (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied) 
 
-   **Reason:** Given user credentials may not have the access s3 bucket. Add s3 policy with read permission and verify.
+   **Reason:** Given user credentials may not have the access the S3 bucket. Add S3 policy with read permission and verify.
