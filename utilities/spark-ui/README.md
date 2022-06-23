@@ -24,7 +24,7 @@ docker build -t emr/spark-ui .
 
 ## Start the Spark History Server
 
-You can use a pair of AWS access key and secret key, or temporary AWS credentials. This credentials should have access to s3 bucket. If customer enables encryption for the logs stored in s3 bucket, then credentials should have access to KMS key as well.
+You can use a pair of AWS access key and secret key, or temporary AWS credentials. These credentials should have access to the S3 log bucket. If encryption is enabled for the logs stored in the S3 bucket, these credentials should have access to the necessary KMS key as well.
 
 1. Set `LOG_DIR` to the location of your Spark eventlogs.
 
