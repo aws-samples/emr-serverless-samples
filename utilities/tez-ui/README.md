@@ -25,9 +25,11 @@ You can use a pair of AWS access key and secret key, or temporary AWS credential
 1. Set a few environment variables relevant to your job.
 
 ```shell
-export S3_LOG_URI=s3://${S3_BUCKET}/hive-logs
 export APPLICATION_ID=001122334455
 export JOB_RUN_ID=667788990011
+CONTAINER_LOG_BASE_PATH=hive-logs
+export S3_LOG_URI=s3://$S3_BUCKET/$CONTAINER_LOG_BASE_PATH
+export AWS_CONSOLE_BASE_PATH_URL="https://s3.console.aws.amazon.com/s3/buckets/${S3_BUCKET}?prefix=${CONTAINER_LOG_BASE_PATH}/applications/${APPLICATION_ID}/jobs/${JOB_RUN_ID}"
 ```
 
 2. Set your AWS access key and secret key, and optionally session token.
@@ -44,7 +46,7 @@ export AWS_SESSION_TOKEN="zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
 docker run --rm -it \
     -p 8088:8088 -p 8188:8188 -p 9999:9999 \
     -e AWS_REGION=us-east-1 -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
-    -e S3_LOG_URI -e JOB_RUN_ID -e APPLICATION_ID \
+    -e S3_LOG_URI -e JOB_RUN_ID -e APPLICATION_ID -e AWS_CONSOLE_BASE_PATH_URL \
     emr/tez-ui
 ```
 
@@ -60,3 +62,4 @@ You may get following exception during TEZ UI startup.
 2. **Issue/Exception:**  com.amazon.ws.emr.hadoop.fs.shaded.com.amazonaws.services.s3.model.AmazonS3Exception: Access Denied (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied) 
 
    **Reason:** Given user credentials may not have the access the S3 bucket. Add S3 policy with read permission and verify.
+

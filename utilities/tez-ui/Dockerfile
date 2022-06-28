@@ -6,7 +6,7 @@ LABEL org.opencontainers.image.source https://github.com/aws-samples/emr-serverl
 LABEL org.opencontainers.image.url https://github.com/aws-samples/emr-serverless-samples/tree/main/utilities/tez-ui
 LABEL org.opencontainers.image.documentation https://github.com/aws-samples/emr-serverless-samples/blob/main/utilities/tez-ui/README.md
 
-RUN yum install -y procps awscli rsync
+RUN yum install -y procps awscli rsync patch
 
 WORKDIR /tmp/
 ENV ENTRYPOINT /usr/bin/entrypoint.sh
@@ -40,6 +40,7 @@ RUN mvn dependency:copy-dependencies -DoutputDirectory=/tmp/tez-ui/ && \
 
 COPY event-log-sync.sh .
 COPY entrypoint.sh /usr/bin/entrypoint.sh
+COPY tez-ui.patch /tmp/
 
 RUN chmod 744 $ENTRYPOINT
 
