@@ -44,6 +44,7 @@ aws s3 cp ge_profile.py s3://${S3_BUCKET}/code/pyspark/
 - `entryPoint` should point to your script on S3
 - `entryPointArguments` defines the output location of the Great Expectations profiler
 - The virtualenv archive is added via the `--archives` parameter
+- The driver and executor Python paths are configured via the various `--conf spark.emr-serverless` parameters
 
 ```shell
 aws emr-serverless start-job-run \
