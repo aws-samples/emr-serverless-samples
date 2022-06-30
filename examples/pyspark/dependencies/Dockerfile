@@ -1,4 +1,4 @@
-FROM amazonlinux:2 AS base
+FROM --platform=linux/amd64 amazonlinux:2 AS base
 
 RUN yum install -y python3
 

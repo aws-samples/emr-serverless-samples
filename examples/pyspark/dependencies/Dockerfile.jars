@@ -1,4 +1,4 @@
-FROM maven:3.6-amazoncorretto-8 AS build
+FROM --platform=linux/amd64 maven:3.6-amazoncorretto-8 AS build
 
 WORKDIR /build
 COPY pom.xml .

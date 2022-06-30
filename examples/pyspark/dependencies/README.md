@@ -8,6 +8,8 @@ You can create isolated Python virtual environments to package multiple Python l
 - [Docker](https://www.docker.com/get-started)
 - An S3 bucket in `us-east-1` and an IAM Role to run your EMR Serverless jobs
 
+> **Note**: If using Docker on Apple Silicon ensure you use `--platform linux/amd64`
+
 Set the following variables according to your environment.
 
 ```shell
