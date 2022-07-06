@@ -99,6 +99,10 @@ Now you're ready to go! Check out the examples below.
 
   Sample templates for creating an EMR Serverless application as well as various dependencies.
 
+- [CDK Examples](./cdk/README.md)
+
+  Examples of building EMR Serverless environments with Amazon CDK.
+
 - [Airflow Operator](./airflow/README.md)
 
   Sample DAGs and preview version of the Airflow Operator. Check the [releases page](https://github.com/aws-samples/emr-serverless-samples/releases) for updates.
