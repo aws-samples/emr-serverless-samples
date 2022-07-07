@@ -127,6 +127,7 @@ class EmrServerlessStartJobOperator(BaseOperator):
         client_request_token: str = "",
         wait_for_completion: bool = True,
         aws_conn_id: str = DEFAULT_CONN_ID,
+        config: Optional[dict] = None,
         **kwargs,
     ):
         self.aws_conn_id = aws_conn_id
@@ -135,6 +136,7 @@ class EmrServerlessStartJobOperator(BaseOperator):
         self.job_driver = job_driver
         self.configuration_overrides = configuration_overrides
         self.wait_for_completion = wait_for_completion
+        self.config = config or {}
         super().__init__(**kwargs)
 
         self.client_request_token = client_request_token or str(uuid4())
@@ -157,6 +159,7 @@ class EmrServerlessStartJobOperator(BaseOperator):
             execution_role_arn=self.execution_role_arn,
             job_driver=self.job_driver,
             configuration_overrides=self.configuration_overrides,
+            **self.config,
         )
 
         if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
@@ -169,7 +172,7 @@ class EmrServerlessStartJobOperator(BaseOperator):
                 self.application_id, job_run_id
             )
             if query_status in EmrServerlessJobSensor.FAILURE_STATES:
-                error_message = self.hook.get_serverless_job_state_details(self.job_id)
+                error_message = emr_serverless_hook.get_serverless_job_state_details(self.job_id)
                 raise AirflowException(
                     f"EMR Serverless job failed. Final state is {query_status}. "
                     f"job_run_id is {job_run_id}. Error: {error_message}"
