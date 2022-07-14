@@ -144,6 +144,7 @@ class EmrServerlessHook(AwsBaseHook):
         execution_role_arn: str,
         job_driver: dict,
         configuration_overrides: Optional[dict],
+        **kwargs,
     ) -> Dict:
         """
         Starts an EMR Serverless job on a created application.
@@ -171,6 +172,7 @@ class EmrServerlessHook(AwsBaseHook):
                 executionRoleArn=execution_role_arn,
                 jobDriver=job_driver,
                 configurationOverrides=configuration_overrides,
+                **kwargs,
             )
         except Exception as ex:
             self.log.error(f"Exception while starting job: {ex}")
