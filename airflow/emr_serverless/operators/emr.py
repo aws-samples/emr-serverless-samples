@@ -114,9 +114,10 @@ class EmrServerlessStartJobOperator(BaseOperator):
       Its value must be unique for each request.
     :param wait_for_completion: If true, waits for the job to start before returning. Defaults to True.
     :param aws_conn_id: AWS connection to use
+    :param config: extra configuration for the job.
     """
 
-    template_fields: Sequence[str] = ("application_id",)
+    template_fields: Sequence[str] = ("application_id", "execution_role_arn", "job_driver", "configuration_overrides")
 
     def __init__(
         self,
