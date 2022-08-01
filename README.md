@@ -132,15 +132,13 @@ You can call [EMR Serverless APIs](https://docs.aws.amazon.com/emr-serverless/la
 
 ## Utilities
 
-_These UIs are available in the EMR Serverless console, but you can still use them locally if you wish._
+- [EMR Serverless Estimator](https://github.com/aws-samples/aws-emr-utilities/tree/main/utilities/emr-serverless-estimator) - Estimate the cost of running Spark jobs on EMR Serverless based on Spark event logs.
 
-- [Spark UI](/utilities/spark-ui/)
+_The following UIs are available in the EMR Serverless console, but you can still use them locally if you wish._
 
-  You can use this Dockerfile to run Spark history server in your container.
+- [Spark UI](/utilities/spark-ui/)- Use this Dockerfile to run Spark history server in a container.
 
-- [Tez UI](/utilities/tez-ui/)
-
-  You can use this Dockerfile to run Tez UI and Application Timeline Server in your container.
+- [Tez UI](/utilities/tez-ui/)- Use this Dockerfile to run Tez UI and Application Timeline Server in a container.
 
 ## Security
 
