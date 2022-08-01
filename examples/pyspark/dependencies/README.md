@@ -1,4 +1,4 @@
-# Python Depedencies
+# Python Dependencies
 
 You can create isolated Python virtual environments to package multiple Python libraries for a PySpark job. Here is an example of how you can package [Great Expectations](https://greatexpectations.io/) and profile a set of sample data.
 
@@ -79,7 +79,44 @@ open ./ge.html
 
 ## PySpark jobs with Java dependencies
 
-Sometimes you need to pull in Java dependencies like Kafka or PostgreSQL libraries. Unfortunately, `spark.jars.packages` will not work at this time so you will need to create a dependency uberjar and upload that to S3.
+Sometimes you need to pull in Java dependencies like Kafka or PostgreSQL libraries. As of release label `emr-6.7.0`, you can use either `spark.jars.packages` or the `--packages` flag in your `sparkSubmitParameters` as shown below. Be sure to create your application within a VPC so that it can download the necessary dependencies.
+
+```shell
+# First create an application with release label emr-6.7.0 and a network configuration
+aws emr-serverless create-application \
+    --release-label emr-6.7.0 \
+    --type SPARK \
+    --name spark-packages \
+    --network-configuration '{
+        "subnetIds": ["subnet-abcdef01234567890", "subnet-abcdef01234567891"],
+        "securityGroupIds": ["sg-abcdef01234567893"]
+    }'
+
+# Then submit a job (replacing the application id, arn, and your code/packages)
+aws emr-serverless start-job-run \
+    --name pg-query \
+    --application-id $APPLICATION_ID \
+    --execution-role-arn $JOB_ROLE_ARN \
+    --job-driver '{
+        "sparkSubmit": {
+            "entryPoint": "s3://'${S3_BUCKET}'/code/pyspark/pg_query.py",
+            "sparkSubmitParameters": "--packages org.postgresql:postgresql:42.4.0"
+        }
+    }' \
+    --configuration-overrides '{
+        "monitoringConfiguration": {
+            "s3MonitoringConfiguration": {
+                "logUri": "s3://'${S3_BUCKET}'/logs/"
+            }
+        }
+    }'
+```
+
+### Packaging dependencies into an uberjar
+
+While `--packages` will let you easily specify additional dependencies for your job, these dependencies are not cached between job runs. In other words, each job run will need to re-fetch the dependencies potentially leading to increased startup time. To mitigate this, and to create reproducible builds, you can create a dependency uberjar and upload that to S3.
+
+_This approach can also be used with EMR release label `emr-6.6.0`._
 
 To do this, we'll create a [`pom.xml`](./pom.xml) that specifies our dependencies and use a [maven Docker container](./Dockerfile.jars) to build the uberjar. In this example, we'll package `org.postgresql:postgresql:42.4.0` and use the example script in [./pg_query.py](./pg_query.py) to query a Postgres database.
 
