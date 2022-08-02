@@ -1,1 +1,1 @@
-emr_serverless @ https://github.com/aws-samples/emr-serverless-samples/releases/download/v0.0.2-preview/mwaa_plugin.zip
+emr_serverless @ https://github.com/aws-samples/emr-serverless-samples/releases/download/v0.0.4-preview/mwaa_plugin.zip
