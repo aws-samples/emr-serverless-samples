@@ -173,7 +173,7 @@ class EmrServerlessStartJobOperator(BaseOperator):
                 self.application_id, job_run_id
             )
             if query_status in EmrServerlessJobSensor.FAILURE_STATES:
-                error_message = emr_serverless_hook.get_serverless_job_state_details(self.job_id)
+                error_message = emr_serverless_hook.get_serverless_job_state_details(self.application_id, job_run_id)
                 raise AirflowException(
                     f"EMR Serverless job failed. Final state is {query_status}. "
                     f"job_run_id is {job_run_id}. Error: {error_message}"

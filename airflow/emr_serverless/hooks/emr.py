@@ -201,7 +201,7 @@ class EmrServerlessHook(AwsBaseHook):
         reason = None
 
         try:
-            response = self.conn.describe_job_run(
+            response = self.conn.get_job_run(
                 applicationId=application_id,
                 jobRunId=job_run_id,
             )
