@@ -55,5 +55,6 @@ with DAG(
                 }
             },
         },
+        config={"name": "sample-job"}
     )
     # [END howto_operator_emr_serverless_job]

@@ -19,27 +19,12 @@ import os
 from datetime import datetime
 
 from airflow import DAG
+from airflow.models import Variable
 from emr_serverless.operators.emr import EmrServerlessStartJobOperator
 
-APPLICATION_ID = os.getenv("APPLICATION_ID", "00f0abcde4fg0001")
-JOB_ROLE_ARN = os.getenv("JOB_ROLE_ARN", "arn:aws:iam::012345678912:role/emr_serverless_default_role")
-S3_LOGS_BUCKET = os.getenv("S3_BUCKET", "my-logs-bucket")
-
-# [START howto_operator_emr_serverless_config]
-JOB_DRIVER_ARG = {
-    "sparkSubmit": {
-        "entryPoint": "local:///usr/lib/spark/examples/src/main/python/pi.py",
-    }
-}
-
-CONFIGURATION_OVERRIDES_ARG = {
-    "monitoringConfiguration": {
-        "s3MonitoringConfiguration": {
-            "logUri": f"s3://{S3_LOGS_BUCKET}/logs/"
-        }
-    },
-}
-# [END howto_operator_emr_serverless_config]
+APPLICATION_ID = Variable.get("emr_serverless_application_id")
+JOB_ROLE_ARN = Variable.get("emr_serverless_job_role")
+S3_LOGS_BUCKET = Variable.get("emr_serverless_log_bucket")
 
 with DAG(
     dag_id='example_emr_serverless_job',
@@ -58,7 +43,18 @@ with DAG(
         task_id="start_job",
         application_id=APPLICATION_ID,
         execution_role_arn=JOB_ROLE_ARN,
-        job_driver=JOB_DRIVER_ARG,
-        configuration_overrides=CONFIGURATION_OVERRIDES_ARG,
+        job_driver={
+            "sparkSubmit": {
+                "entryPoint": "local:///usr/lib/spark/examples/src/main/python/pi.py",
+            }
+        },
+        configuration_overrides={
+            "monitoringConfiguration": {
+                "s3MonitoringConfiguration": {
+                    "logUri": f"s3://{S3_LOGS_BUCKET}/logs/"
+                }
+            },
+        },
+        config={"name": "sample-job"}
     )
     # [END howto_operator_emr_serverless_job]
