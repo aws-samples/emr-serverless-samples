@@ -7,11 +7,11 @@ from emr_serverless.operators.emr import (
 )
 
 from airflow import DAG
+from airflow.models import Variable
 
 # Replace these with your correct values
-APPLICATION_ID = "00f0abcde4fg0001"
-JOB_ROLE_ARN = "arn:aws:iam::012345678912:role/emr_serverless_default_role"
-S3_LOGS_BUCKET = "my-logs-bucket"
+JOB_ROLE_ARN = Variable.get("emr_serverless_job_role")
+S3_LOGS_BUCKET = Variable.get("emr_serverless_log_bucket")
 
 DEFAULT_MONITORING_CONFIG = {
     "monitoringConfiguration": {
@@ -27,8 +27,10 @@ with DAG(
     catchup=False,
 ) as dag:
     create_app = EmrServerlessCreateApplicationOperator(
-        task_id="create_spark_app", job_type="SPARK", release_label="emr-6.6.0",
-        config={"name": "sample-job"}
+        task_id="create_spark_app",
+        job_type="SPARK",
+        release_label="emr-6.6.0",
+        config={"name": "sample-job"},
     )
 
     application_id = create_app.output
@@ -39,7 +41,7 @@ with DAG(
         execution_role_arn=JOB_ROLE_ARN,
         job_driver={
             "sparkSubmit": {
-                "entryPoint": "s3://<YOUR_BUCKET>/code/spark_job1.py",
+                "entryPoint": "local:///usr/lib/spark/examples/src/main/python/pi.py",
             }
         },
         configuration_overrides=DEFAULT_MONITORING_CONFIG,
@@ -51,7 +53,7 @@ with DAG(
         execution_role_arn=JOB_ROLE_ARN,
         job_driver={
             "sparkSubmit": {
-                "entryPoint": "s3://<YOUR_BUCKET>/code/spark_job2.py",
+                "entryPoint": "local:///usr/lib/spark/examples/src/main/python/pi.py",
             }
         },
         configuration_overrides=DEFAULT_MONITORING_CONFIG,
@@ -60,6 +62,7 @@ with DAG(
     delete_app = EmrServerlessDeleteApplicationOperator(
         task_id="delete_app",
         application_id=application_id,
+        trigger_rule="all_done",
     )
 
     (create_app >> [job1, job2] >> delete_app)
