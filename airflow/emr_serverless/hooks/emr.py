@@ -19,7 +19,6 @@ from time import sleep
 from typing import Any, Callable, Dict, List, Set
 
 from botocore.config import Config
-from botocore.exceptions import ClientError
 
 from airflow.compat.functools import cached_property
 from airflow.exceptions import AirflowException
@@ -37,6 +36,7 @@ class EmrServerlessHook(AwsBaseHook):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs["client_type"] = "emr-serverless"
+        kwargs["config"] = Config(user_agent_extra="EMRServerlessAirflowOperator/1.0.0")
         super().__init__(*args, **kwargs)
 
     @cached_property
@@ -81,7 +81,9 @@ class EmrServerlessHook(AwsBaseHook):
                 )
             if countdown >= check_interval_seconds:
                 countdown -= check_interval_seconds
-                self.log.info('Waiting for %s to be %s.', object_type.lower(), action.lower())
+                self.log.info(
+                    "Waiting for %s to be %s.", object_type.lower(), action.lower()
+                )
                 sleep(check_interval_seconds)
                 state = self.get_state(
                     get_state_callable(**get_state_args), parse_response
