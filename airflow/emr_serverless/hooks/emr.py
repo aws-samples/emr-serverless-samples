@@ -36,7 +36,7 @@ class EmrServerlessHook(AwsBaseHook):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs["client_type"] = "emr-serverless"
-        kwargs["config"] = Config(user_agent_extra="EMRServerlessAirflowOperator/1.0.0")
+        kwargs["config"] = Config(user_agent_extra="EMRServerlessAirflowOperator/1.0.1")
         super().__init__(*args, **kwargs)
 
     @cached_property

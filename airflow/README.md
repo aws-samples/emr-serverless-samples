@@ -9,7 +9,7 @@ It's recommended to use the official provider package as that will receive futur
 The most recent version (as of 2022-08-14) of the Operator is available as a semantic-versioned zip in this repository. In order to use it, just add the following line to your `requirements.txt` file.
 
 ```
-emr_serverless @ https://github.com/aws-samples/emr-serverless-samples/releases/download/v1.0.0/mwaa_plugin.zip
+emr_serverless @ https://github.com/aws-samples/emr-serverless-samples/releases/download/v1.0.1/mwaa_plugin.zip
 ```
 
 Note that the operator depends on `boto3>=1.23.9`. This requirement is defined in the `setup.py` file.
