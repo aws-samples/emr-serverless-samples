@@ -217,7 +217,7 @@ class EmrServerlessStartJobOperator(BaseOperator):
                     "jobRunId": response["jobRunId"],
                 },
                 parse_response=["jobRun", "state"],
-                desired_state=EmrServerlessJobSensor.TERMINAL_STATES,
+                desired_state=EmrServerlessJobSensor.SUCCESS_STATES,
                 failure_states=EmrServerlessJobSensor.FAILURE_STATES,
                 object_type="job",
                 action="run",
@@ -236,7 +236,7 @@ class EmrServerlessDeleteApplicationOperator(BaseOperator):
     :param aws_conn_id: AWS connection to use
     """
 
-    template_fields: Sequence[str] = "application_id"
+    template_fields: Sequence[str] = ("application_id",)
 
     def __init__(
         self,
