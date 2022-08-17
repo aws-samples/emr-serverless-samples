@@ -236,7 +236,7 @@ class EmrServerlessDeleteApplicationOperator(BaseOperator):
     :param aws_conn_id: AWS connection to use
     """
 
-    template_fields: Sequence[str] = "application_id"
+    template_fields: Sequence[str] = ("application_id",)
 
     def __init__(
         self,
