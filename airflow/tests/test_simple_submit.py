@@ -78,9 +78,15 @@ def test_job_failure():
         )
 
         dag.clear()
-        dag.run(
-            executor=DebugExecutor(), start_date=dag.start_date, end_date=dag.start_date
-        )
+        try:
+            # The whole DAG run will fail
+            dag.run(
+                executor=DebugExecutor(),
+                start_date=dag.start_date,
+                end_date=dag.start_date,
+            )
+        except:
+            pass
 
         # Validate DAG run failed
         dagruns = DagRun.find(dag_id=dag.dag_id, execution_date=dag.start_date)

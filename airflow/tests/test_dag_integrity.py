@@ -9,4 +9,6 @@ def test_dagbag():
     This includes sanity checks e.g. do tasks have required arguments, are DAG ids unique & do DAGs have no cycles.
     """
     dag_bag = DagBag(include_examples=False)
-    assert not dag_bag.import_errors  # Import errors aren't raised but captured to ensure all DAGs are parsed
+    assert (
+        not dag_bag.import_errors
+    )  # Import errors aren't raised but captured to ensure all DAGs are parsed
