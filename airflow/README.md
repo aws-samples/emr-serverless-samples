@@ -22,3 +22,26 @@ There are two example DAGs in this repository. They make use of [Variables](http
 - [example_end_to_end.py](./dags/example_end_to_end.py) - Creates an EMR Serverless Spark application, runs two independent jobs, and deletes the application.
 
 The second example is useful if you want to have a completely ephemeral EMR Serverless environment. When you delete the application, it no longer shows up in the AWS Console nor are you able to access the Spark UI in the console for the jobs. However, logs can be written to S3 for debugging purposes.
+
+## Testing
+
+I've made a couple simple end-to-end tests that run against a pre-existing EMR Serverless application.
+
+These are only intended to be run prior to a release to ensure Operator stability and completeness.
+
+There are several environment variables that need to be populated, including AWS credentials.
+
+```
+# Build the test container
+docker build -t emr-serverless-airflow-tests .
+
+# Run the tests
+docker run --rm -it \
+    -e AIRFLOW_VAR_EMR_SERVERLESS_APPLICATION_ID=00abcdefgh123456 \
+    -e AIRFLOW_VAR_EMR_SERVERLESS_JOB_ROLE=arn:aws:iam::123456789012:role/emr-serverless-job-role \
+    -e AIRFLOW_VAR_EMR_SERVERLESS_LOG_BUCKET=emr-serverless-log-bucket \
+    -eAWS_ACCESS_KEY_ID -eAWS_SECRET_ACCESS_KEY -eAWS_SESSION_TOKEN \
+    emr-serverless-airflow-tests
+```
+
+If you want to run the tests without rebuilding, you add `-v $(pwd)/tests:/opt/emr/tests` to the docker run command.

@@ -1,0 +1,4 @@
+apache-airflow~=2.2.2
+apache-airflow-providers-amazon~=4.0
+pytest~=7.1.2
+boto3>=1.23.9,~=1.23
