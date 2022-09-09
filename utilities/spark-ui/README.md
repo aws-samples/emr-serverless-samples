@@ -32,7 +32,13 @@ You can use a pair of AWS access key and secret key, or temporary AWS credential
 export LOG_DIR=s3://${S3_BUCKET}/logs/applications/$APPLICATION_ID/jobs/$JOB_RUN_ID/sparklogs/
 ```
 
-2. Set your AWS access key and secret key, and optionally session token.
+2. Set `EXECUTOR_LOG_PATH` to the location of your Executor log files.
+
+```shell
+export EXECUTOR_LOG_PATH=https://s3.console.aws.amazon.com/s3/object/${S3_BUCKET}/logs/applications/$APPLICATION_ID/jobs/$JOB_RUN_ID/{{CONTAINER_ID}}/{{FILE_NAME}}.gz
+```
+
+3. Set your AWS access key and secret key, and optionally session token.
 
 ```shell
 export AWS_ACCESS_KEY_ID="ASIAxxxxxxxxxxxx"
@@ -40,18 +46,18 @@ export AWS_SECRET_ACCESS_KEY="yyyyyyyyyyyyyyy"
 export AWS_SESSION_TOKEN="zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
 ```
 
-3. Run the Docker image
+4. Run the Docker image
 
 ```shell
 docker run --rm -it \
     -p 18080:18080 \
-    -e SPARK_HISTORY_OPTS="-Dspark.history.fs.logDirectory=$LOG_DIR -Dspark.hadoop.fs.s3.customAWSCredentialsProvider=com.amazonaws.auth.DefaultAWSCredentialsProviderChain" \
+    -e SPARK_HISTORY_OPTS="-Dspark.history.fs.logDirectory=$LOG_DIR -Dspark.history.custom.executor.log.url=$EXECUTOR_LOG_PATH -Dspark.hadoop.fs.s3.customAWSCredentialsProvider=com.amazonaws.auth.DefaultAWSCredentialsProviderChain" \
     -e AWS_REGION=us-east-1 \
     -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
     emr/spark-ui
 ```
 
-4. Access the Spark UI via http://localhost:18080
+5. Access the Spark UI via http://localhost:18080
 
 ## Troubleshooting
 
