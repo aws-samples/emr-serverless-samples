@@ -99,7 +99,7 @@ Now you're ready to go! Check out the examples below.
 
   Sample templates for creating an EMR Serverless application as well as various dependencies.
 
-- [CloudWatch Dashboard Template](/./cloudformation/emr-serverless-cloudwatch-dashboard/README.md)
+- [CloudWatch Dashboard Template](./cloudformation/emr-serverless-cloudwatch-dashboard/README.md)
 
   Template for creating a CloudWatch Dashboard for monitoring your EMR Serverless application.
 

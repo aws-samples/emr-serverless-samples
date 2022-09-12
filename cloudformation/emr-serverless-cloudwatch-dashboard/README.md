@@ -6,6 +6,8 @@ You can visualize EMR Serverless application metrics in a CloudWatch Dashboard. 
 
 The CloudWatch Dashboard provides an overview of pre-initialized capacity vs. OnDemand as well as drill-down metrics for CPU, memory, and disk usage for Spark Drivers and Executors. [Pre-initialized capacity is an optional feature of EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html) that keeps driver and workers pre-initialized and ready to respond in seconds and this dashboard can help understand if pre-initialized capacity is being used effectively.
 
+Follow along below to see how to get started or see a full demo in the [walkthrough](#example-walkthrough) section.
+
 ## Getting started
 
 **From the CloudFormation Console:**
