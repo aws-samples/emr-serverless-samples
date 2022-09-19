@@ -17,6 +17,11 @@
 
 SET hive.cli.print.header=true;
 SET hive.query.name=ExtremeWeather;
+-- This query uses 10843 small text data files with header. EMR versions >= 6.6.0 have the support to split text files with header/footer (OSS Jira: HIVE-21924).
+-- With default input format (org.apache.hadoop.hive.ql.io.HiveInputFormat), a single thread in Tez AM reads all the data files during split computation.
+-- Therefore, split computation takes ~1.5 hrs for this query in EMR versions >= 6.6.0. Using CombineHiveInputFormat and configuring the split size solves this problem.
+SET hive.tez.input.format=org.apache.hadoop.hive.ql.io.CombineHiveInputFormat;
+SET mapreduce.input.fileinputformat.split.maxsize=16777216;
 
 WITH noaa_year_data AS (
     SELECT
