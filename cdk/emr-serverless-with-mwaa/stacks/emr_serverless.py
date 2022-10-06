@@ -235,6 +235,7 @@ class EMRServerlessStack(Stack):
                 title=name,
                 period=Duration.minutes(1),
                 width=12,
+                stacked=True,
                 left=[
                     cw.MathExpression(
                         expression="m1+m2",
@@ -309,6 +310,7 @@ class EMRServerlessStack(Stack):
                 title="Running Workers",
                 period=Duration.minutes(1),
                 width=12,
+                stacked=True,
                 left=[
                     cw.MathExpression(
                         expression="m1+m2+m5",
@@ -350,6 +352,7 @@ class EMRServerlessStack(Stack):
                 title="Pre-Initialized Capacity: Total Workers",
                 period=Duration.minutes(1),
                 width=12,
+                stacked=True,
                 left=[
                     cw.MathExpression(
                         expression="m1+m2+m3",
@@ -367,6 +370,7 @@ class EMRServerlessStack(Stack):
                 title="Pre-Initialized Capacity: Worker Utilization %",
                 period=Duration.minutes(1),
                 width=12,
+                stacked=True,
                 left=[
                     cw.MathExpression(
                         expression="100*((m1+m2)/(m1+m2+m3))",
@@ -386,6 +390,7 @@ class EMRServerlessStack(Stack):
                 title="Pre-Initialized Capacity: Idle Workers",
                 period=Duration.minutes(1),
                 width=12,
+                stacked=True,
                 left=[idle_workers],
             )
         )
@@ -417,6 +422,7 @@ class EMRServerlessStack(Stack):
                         title=row[0]["name"],
                         period=Duration.minutes(1),
                         width=12,
+                        stacked=True,
                         left=[
                             cw.Metric(
                                 metric_name=row[0]["metric"],
@@ -448,6 +454,7 @@ class EMRServerlessStack(Stack):
                         title=row[1]["name"],
                         period=Duration.minutes(1),
                         width=12,
+                        stacked=True,
                         left=[
                             cw.Metric(
                                 metric_name=row[1]["metric"],
