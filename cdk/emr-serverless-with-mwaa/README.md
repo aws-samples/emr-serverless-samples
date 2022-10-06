@@ -13,7 +13,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-One you've got CDK and Python setup, you can use `cdk deploy --all --output out.json` to deploy the stack and write outputs to a JSON file.
+One you've got CDK and Python setup, you can use `cdk deploy --all --outputs-file out.json` to deploy the stack and write outputs to a JSON file.
 
 The stack that's created uses [pre-initialized capacity](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html) so that Spark jobs can start instantly, but note that this can result in additional cost as resources are maintained for a certain period of time after jobs finish their runs.
 
