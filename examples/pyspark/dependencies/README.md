@@ -5,7 +5,7 @@ You can create isolated Python virtual environments to package multiple Python l
 ## Pre-requisites
 
 - Access to [EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/setting-up.html)
-- [Docker](https://www.docker.com/get-started)
+- [Docker](https://www.docker.com/get-started) with the [BuildKit backend](https://docs.docker.com/engine/reference/builder/#buildkit)
 - An S3 bucket in `us-east-1` and an IAM Role to run your EMR Serverless jobs
 
 > **Note**: If using Docker on Apple Silicon ensure you use `--platform linux/amd64`
@@ -29,7 +29,8 @@ All the commands below should be executed in this (`examples/pyspark/dependencie
 This command builds the included `Dockerfile` and exports the resulting `pyspark_ge.tar.gz` file to your local filesystem.
 
 ```shell
-docker build --output . .
+# Enable BuildKit backend
+DOCKER_BUILDKIT=1 docker build --output . .
 aws s3 cp pyspark_ge.tar.gz s3://${S3_BUCKET}/artifacts/pyspark/
 ```
 
@@ -125,7 +126,8 @@ To do this, we'll create a [`pom.xml`](./pom.xml) that specifies our dependencie
 1. Build an uberjar with your dependencies
 
 ```shell
-docker build -f Dockerfile.jars --output . .
+# Enable BuildKit backend
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.jars --output . .
 ```
 
 This will create a `uber-jars-1.0-SNAPSHOT.jar` file locally that you will copy to S3 in the next step.

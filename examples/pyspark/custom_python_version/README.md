@@ -10,8 +10,8 @@ Once created, we'll upload the new virtual environment and a sample Python scrip
 # Define a variable for code storage and job logs
 S3_BUCKET=<YOUR_S3_BUCKET>
 
-# Build our custom venv
-docker build --output . .
+# Build our custom venv with BuildKit backend
+DOCKER_BUILDKIT=1 docker build --output . .
 
 # Upload the artifacts to S3
 aws s3 cp pyspark_3.10.6.tar.gz     s3://${S3_BUCKET}/artifacts/pyspark/

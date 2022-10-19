@@ -13,7 +13,8 @@ In addition, we're _also_ going to create an uber-jar directly from the [Glow](h
 - In this directory, run the following command and it will build the Dockerfile and export `pyspark_glow.tar.gz` and `glow-spark3-assembly-1.1.2-SNAPSHOT.jar` to your local filesystem.
 
 ```shell
-docker build --output ./dependencies .
+# Enable BuildKit backend
+DOCKER_BUILDKIT=1 docker build --output ./dependencies .
 ```
 
 - Now copy those files to S3.
@@ -83,7 +84,8 @@ One other alternative I came up with while researching this is using a temp imag
 It uses an EMR on EKS image, so you'll need to [authenticate before building](https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/docker-custom-images-steps.html).
 
 ```shell
-docker build -f Dockerfile.jars . --output jars
+# Enable BuildKit backend
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.jars . --output jars
 ```
 
 This will export ~100 jars to your local filesystem, which you can upload to S3 and specificy via the `--jars` variable as a comma-delimited list.
