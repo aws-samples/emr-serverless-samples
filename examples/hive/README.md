@@ -214,3 +214,7 @@ docker run --rm -d \
 ```shell
 docker stop emr-serverless-tez-ui
 ```
+
+## JSON Data
+
+The example job in this repository uses `OpenCSVSerde` to process CSV data. If you want to process JSON data, you can use the `org.apache.hadoop.hive.serde2.JsonSerDe` with EMR 6.x and `org.apache.hive.hcatalog.data.JsonSerDe` on EMR 5.x. `org.openx.data.jsonserde.JsonSerDe` can be used in either EMR release.
