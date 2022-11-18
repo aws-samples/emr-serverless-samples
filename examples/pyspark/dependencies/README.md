@@ -28,6 +28,8 @@ All the commands below should be executed in this (`examples/pyspark/dependencie
 
 This command builds the included `Dockerfile` and exports the resulting `pyspark_ge.tar.gz` file to your local filesystem.
 
+> **Note** The included [Dockerfile](./Dockerfile) builds for x86 - if you would like to build for Graviton, update the Dockerfile to use `linux/arm64` as the platform and see the [EMR Serverless architecture options](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/architecture.html) for more detail.
+
 ```shell
 # Enable BuildKit backend
 DOCKER_BUILDKIT=1 docker build --output . .
