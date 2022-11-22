@@ -15,8 +15,10 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from __future__ import annotations
+
 from time import sleep
-from typing import Any, Callable, Dict, List, Set
+from typing import Any, Callable
 
 from botocore.config import Config
 
@@ -28,11 +30,22 @@ from airflow.providers.amazon.aws.hooks.base_aws import AwsBaseHook
 class EmrServerlessHook(AwsBaseHook):
     """
     Interact with EMR Serverless API.
+
     Additional arguments (such as ``aws_conn_id``) may be specified and
     are passed down to the underlying AwsBaseHook.
+
     .. seealso::
         :class:`~airflow.providers.amazon.aws.hooks.base_aws.AwsBaseHook`
     """
+
+    JOB_INTERMEDIATE_STATES = {"PENDING", "RUNNING", "SCHEDULED", "SUBMITTED"}
+    JOB_FAILURE_STATES = {"FAILED", "CANCELLING", "CANCELLED"}
+    JOB_SUCCESS_STATES = {"SUCCESS"}
+    JOB_TERMINAL_STATES = JOB_SUCCESS_STATES.union(JOB_FAILURE_STATES)
+
+    APPLICATION_INTERMEDIATE_STATES = {"CREATING", "STARTING", "STOPPING"}
+    APPLICATION_FAILURE_STATES = {"STOPPED", "TERMINATED"}
+    APPLICATION_SUCCESS_STATES = {"CREATED", "STARTED"}
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs["client_type"] = "emr-serverless"
@@ -48,10 +61,10 @@ class EmrServerlessHook(AwsBaseHook):
     def waiter(
         self,
         get_state_callable: Callable,
-        get_state_args: Dict,
-        parse_response: List,
-        desired_state: Set,
-        failure_states: Set,
+        get_state_args: dict,
+        parse_response: list,
+        desired_state: set,
+        failure_states: set,
         object_type: str,
         action: str,
         countdown: int = 25 * 60,
@@ -59,6 +72,7 @@ class EmrServerlessHook(AwsBaseHook):
     ) -> None:
         """
         Will run the sensor until it turns True.
+
         :param get_state_callable: A callable to run until it returns True
         :param get_state_args: Arguments to pass to get_state_callable
         :param parse_response: Dictionary keys to extract state from response of get_state_callable
