@@ -219,6 +219,39 @@ class EMRServerlessStack(Stack):
             ),
         )
 
+        # Finally we have a whole row dedicate to job state
+        job_run_states = [
+            "SubmittedJobs",
+            "PendingJobs",
+            "ScheduledJobs",
+            "RunningJobs",
+            "SuccessJobs",
+            "FailedJobs",
+            "CancellingJobs",
+            "CancelledJobs",
+        ]
+        dashboard.add_widgets(
+            cw.SingleValueWidget(
+                title="Job Runs",
+                width=24,
+                height=6,
+                sparkline=True,
+                metrics=[
+                    cw.Metric(
+                        metric_name=metric,
+                        namespace="AWS/EMRServerless",
+                        dimensions_map={
+                            "ApplicationId": self.serverless_app.attr_application_id,
+                        },
+                        statistic="Sum",
+                        label=metric,
+                        period=Duration.minutes(1),
+                    )
+                    for metric in job_run_states
+                ],
+            )
+        )
+
         ## BEGIN: APPLICATION METRICS SECTION
         dashboard.add_widgets(
             cw.TextWidget(
@@ -484,4 +517,92 @@ class EMRServerlessStack(Stack):
                     ),
                 )
 
+        ## END: DYNAMICALLY GENERATED METRICS
+
+        ## BEGIN: JOB METRICS
+        dashboard.add_widgets(
+            cw.TextWidget(
+                markdown=f"Job Metrics\n---\nJob metrics shows you the aggregate number of jobs in each job state.",
+                height=2,
+                width=24,
+            )
+        )
+
+        dashboard.add_widgets(
+            cw.GraphWidget(
+                title="Running Jobs",
+                width=12,
+                height=6,
+                stacked=True,
+                left=[
+                    cw.Metric(
+                        metric_name="RunningJobs",
+                        namespace="AWS/EMRServerless",
+                        dimensions_map={
+                            "ApplicationId": self.serverless_app.attr_application_id,
+                        },
+                        statistic="Sum",
+                        period=Duration.minutes(1),
+                    )
+                ],
+            ),
+            cw.GraphWidget(
+                title="Successful Jobs",
+                width=12,
+                height=6,
+                stacked=True,
+                left=[
+                    cw.Metric(
+                        metric_name="SuccessJobs",
+                        namespace="AWS/EMRServerless",
+                        dimensions_map={
+                            "ApplicationId": self.serverless_app.attr_application_id,
+                        },
+                        statistic="Sum",
+                        period=Duration.minutes(1),
+                        color="#2ca02c",
+                    )
+                ],
+            ),
+        )
+
+        dashboard.add_widgets(
+            cw.GraphWidget(
+                title="Failed Jobs",
+                width=12,
+                height=6,
+                stacked=True,
+                left=[
+                    cw.Metric(
+                        metric_name="FailedJobs",
+                        namespace="AWS/EMRServerless",
+                        dimensions_map={
+                            "ApplicationId": self.serverless_app.attr_application_id,
+                        },
+                        statistic="Sum",
+                        period=Duration.minutes(1),
+                        color="#d62728",
+                    )
+                ],
+            ),
+            cw.GraphWidget(
+                title="Cancelled Jobs",
+                width=12,
+                height=6,
+                stacked=True,
+                left=[
+                    cw.Metric(
+                        metric_name="CancelledJobs",
+                        namespace="AWS/EMRServerless",
+                        dimensions_map={
+                            "ApplicationId": self.serverless_app.attr_application_id,
+                        },
+                        statistic="Sum",
+                        period=Duration.minutes(1),
+                        color="#c5b0d5",
+                    )
+                ],
+            ),
+        )
+        ## END: JOB METRICS
         return dashboard
