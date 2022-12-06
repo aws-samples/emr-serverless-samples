@@ -48,7 +48,7 @@ The sample Cloudwatch Dashboard provides the following functionality:
  
  ![Screenshot of snapshot metrics for available workers and running Drivers and Executors](images/snapshot_metrics.png "Capacity Utilization Snapshot view")
 
-- Job Runs - Aggregate view of job states for your application
+- Job Runs - Aggregate view of job states for your application per minute
     - Point in time counters for different states including Pending, Running, and Failed jobs.
 
 ![Screenshot of Job Runs](images/job-runs-overview.png "Job Runs")
