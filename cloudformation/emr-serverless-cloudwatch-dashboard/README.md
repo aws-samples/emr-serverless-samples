@@ -1,10 +1,12 @@
 # EMR Serverless CloudWatch Dashboard
 
-You can visualize EMR Serverless application metrics in a CloudWatch Dashboard. The CloudFormation template provided in this repo can be used to deploy the sample CloudWatch Dashboard for Spark applications on EMR Serverless.
+You can visualize EMR Serverless application and job metrics in a CloudWatch Dashboard. The CloudFormation template provided in this repo can be used to deploy the sample CloudWatch Dashboard for Spark applications on EMR Serverless.
 
 ## Overview
 
 The CloudWatch Dashboard provides an overview of pre-initialized capacity vs. OnDemand as well as drill-down metrics for CPU, memory, and disk usage for Spark Drivers and Executors. [Pre-initialized capacity is an optional feature of EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html) that keeps driver and workers pre-initialized and ready to respond in seconds and this dashboard can help understand if pre-initialized capacity is being used effectively.
+
+In addition, you can see job-level metrics for the state of your jobs on a per-application basis.
 
 Follow along below to see how to get started or see a full demo in the [walkthrough](#example-walkthrough) section.
 
@@ -46,6 +48,11 @@ The sample Cloudwatch Dashboard provides the following functionality:
  
  ![Screenshot of snapshot metrics for available workers and running Drivers and Executors](images/snapshot_metrics.png "Capacity Utilization Snapshot view")
 
+- Job Runs - Aggregate view of job states for your application per minute
+    - Point in time counters for different states including Pending, Running, and Failed jobs.
+
+![Screenshot of Job Runs](images/job-runs-overview.png "Job Runs")
+
 - Application Metrics - Shows capacity used by your application
   - Timeline view of Running Workers
   - Timeline view of CPU Allocated 
@@ -76,6 +83,14 @@ The sample Cloudwatch Dashboard provides the following functionality:
   - Timeline view of Disk Allocated 
 
  ![Screenshot of Executor Metrics](images/executor_metrics.png "Executor Metrics")
+
+- Job Metrics
+    - Timeline view of Running Jobs
+    - Timeline view of Success Jobs
+    - Timeline view of Failed Jobs
+    - Timeline view of Cancelled Jobs
+
+![Screenshot of Job Metrics](images/job-metrics-breakdown.png "Job Metrics")
 
 ## Example Walkthrough
 
