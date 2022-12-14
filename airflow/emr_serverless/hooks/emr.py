@@ -24,6 +24,9 @@ from airflow.compat.functools import cached_property
 from airflow.exceptions import AirflowException
 from airflow.providers.amazon.aws.hooks.base_aws import AwsBaseHook
 
+DEFAULT_COUNTDOWN = 25 * 60
+DEFAULT_CHECK_INTERVAL_SECONDS = 60
+
 
 class EmrServerlessHook(AwsBaseHook):
     """
@@ -54,8 +57,8 @@ class EmrServerlessHook(AwsBaseHook):
         failure_states: Set,
         object_type: str,
         action: str,
-        countdown: int = 25 * 60,
-        check_interval_seconds: int = 60,
+        countdown: int = DEFAULT_COUNTDOWN,
+        check_interval_seconds: int = DEFAULT_CHECK_INTERVAL_SECONDS,
     ) -> None:
         """
         Will run the sensor until it turns True.

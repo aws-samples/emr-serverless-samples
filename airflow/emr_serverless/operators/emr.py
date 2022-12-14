@@ -19,7 +19,12 @@ import sys
 from typing import TYPE_CHECKING, Dict, Optional, Sequence
 from uuid import uuid4
 
-from emr_serverless.hooks.emr import EmrServerlessHook
+from emr_serverless.hooks.emr import (
+    EmrServerlessHook,
+    DEFAULT_COUNTDOWN,
+    DEFAULT_CHECK_INTERVAL_SECONDS,
+)
+
 from emr_serverless.sensors.emr import (
     EmrServerlessApplicationSensor,
     EmrServerlessJobSensor,
@@ -158,6 +163,8 @@ class EmrServerlessStartJobOperator(BaseOperator):
         config: Optional[dict] = None,
         wait_for_completion: bool = True,
         aws_conn_id: str = "aws_default",
+        countdown: int = DEFAULT_COUNTDOWN,
+        check_interval_seconds: int = DEFAULT_CHECK_INTERVAL_SECONDS,
         **kwargs,
     ):
         self.aws_conn_id = aws_conn_id
@@ -167,6 +174,8 @@ class EmrServerlessStartJobOperator(BaseOperator):
         self.configuration_overrides = configuration_overrides
         self.wait_for_completion = wait_for_completion
         self.config = config or {}
+        self.countdown = countdown
+        self.check_interval_seconds = check_interval_seconds
         super().__init__(**kwargs)
 
         self.client_request_token = client_request_token or str(uuid4())
@@ -221,6 +230,8 @@ class EmrServerlessStartJobOperator(BaseOperator):
                 failure_states=EmrServerlessJobSensor.FAILURE_STATES,
                 object_type="job",
                 action="run",
+                countdown=self.countdown,
+                check_interval_seconds=self.check_interval_seconds
             )
         return response["jobRunId"]
 
