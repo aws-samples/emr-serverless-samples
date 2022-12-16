@@ -168,6 +168,7 @@ class EmrServerlessStartJobOperator(BaseOperator):
         "application_id",
         "execution_role_arn",
         "job_driver",
+        "config",
         "configuration_overrides",
     )
 
