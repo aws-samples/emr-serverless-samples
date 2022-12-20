@@ -15,15 +15,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from __future__ import annotations
+
 import sys
 from typing import TYPE_CHECKING, Dict, Optional, Sequence
 from uuid import uuid4
 
 from emr_serverless.hooks.emr import EmrServerlessHook
-from emr_serverless.sensors.emr import (
-    EmrServerlessApplicationSensor,
-    EmrServerlessJobSensor,
-)
 
 from airflow.exceptions import AirflowException
 from airflow.models import BaseOperator
@@ -44,16 +42,24 @@ else:
 class EmrServerlessCreateApplicationOperator(BaseOperator):
     """
     Operator to create Serverless EMR Application
+
     .. seealso::
         For more information on how to use this operator, take a look at the guide:
         :ref:`howto/operator:EmrServerlessCreateApplicationOperator`
+
     :param release_label: The EMR release version associated with the application.
     :param job_type: The type of application you want to start, such as Spark or Hive.
-    :param wait_for_completion: If true, wait for the Application to start before returning. Default to True
+    :param wait_for_completion: If true, wait for the Application to start before returning. Default to True.
+        If set to False, ``waiter_countdown`` and ``waiter_check_interval_seconds`` will only be applied when
+        waiting for the application to be in the ``CREATED`` state.
     :param client_request_token: The client idempotency token of the application to create.
       Its value must be unique for each request.
     :param config: Optional dictionary for arbitrary parameters to the boto API create_application call.
     :param aws_conn_id: AWS connection to use
+    :param waiter_countdown: Total amount of time, in seconds, the operator will wait for
+        the application to start. Defaults to 25 minutes.
+    :param waiter_check_interval_seconds: Number of seconds between polling the state of the application.
+        Defaults to 60 seconds.
     """
 
     def __init__(
@@ -61,9 +67,11 @@ class EmrServerlessCreateApplicationOperator(BaseOperator):
         release_label: str,
         job_type: str,
         client_request_token: str = "",
-        config: Optional[dict] = None,
+        config: dict | None = None,
         wait_for_completion: bool = True,
         aws_conn_id: str = "aws_default",
+        waiter_countdown: int = 25 * 60,
+        waiter_check_interval_seconds: int = 60,
         **kwargs,
     ):
         self.aws_conn_id = aws_conn_id
@@ -72,6 +80,8 @@ class EmrServerlessCreateApplicationOperator(BaseOperator):
         self.wait_for_completion = wait_for_completion
         self.kwargs = kwargs
         self.config = config or {}
+        self.waiter_countdown = waiter_countdown
+        self.waiter_check_interval_seconds = waiter_check_interval_seconds
         super().__init__(**kwargs)
 
         self.client_request_token = client_request_token or str(uuid4())
@@ -81,7 +91,7 @@ class EmrServerlessCreateApplicationOperator(BaseOperator):
         """Create and return an EmrServerlessHook."""
         return EmrServerlessHook(aws_conn_id=self.aws_conn_id)
 
-    def execute(self, context: "Context"):
+    def execute(self, context: Context):
         response = self.hook.conn.create_application(
             clientToken=self.client_request_token,
             releaseLabel=self.release_label,
@@ -101,9 +111,11 @@ class EmrServerlessCreateApplicationOperator(BaseOperator):
             get_state_args={"applicationId": application_id},
             parse_response=["application", "state"],
             desired_state={"CREATED"},
-            failure_states=EmrServerlessApplicationSensor.FAILURE_STATES,
+            failure_states=EmrServerlessHook.APPLICATION_FAILURE_STATES,
             object_type="application",
             action="created",
+            countdown=self.waiter_countdown,
+            check_interval_seconds=self.waiter_check_interval_seconds,
         )
 
         self.log.info("Starting application %s", application_id)
@@ -116,9 +128,11 @@ class EmrServerlessCreateApplicationOperator(BaseOperator):
                 get_state_args={"applicationId": application_id},
                 parse_response=["application", "state"],
                 desired_state={"STARTED"},
-                failure_states=EmrServerlessApplicationSensor.FAILURE_STATES,
+                failure_states=EmrServerlessHook.APPLICATION_FAILURE_STATES,
                 object_type="application",
                 action="started",
+                countdown=self.waiter_countdown,
+                check_interval_seconds=self.waiter_check_interval_seconds,
             )
 
         return application_id
@@ -127,9 +141,11 @@ class EmrServerlessCreateApplicationOperator(BaseOperator):
 class EmrServerlessStartJobOperator(BaseOperator):
     """
     Operator to start EMR Serverless job.
+
     .. seealso::
         For more information on how to use this operator, take a look at the guide:
         :ref:`howto/operator:EmrServerlessStartJobOperator`
+
     :param application_id: ID of the EMR Serverless application to start.
     :param execution_role_arn: ARN of role to perform action.
     :param job_driver: Driver that the job runs on.
@@ -138,13 +154,21 @@ class EmrServerlessStartJobOperator(BaseOperator):
       Its value must be unique for each request.
     :param config: Optional dictionary for arbitrary parameters to the boto API start_job_run call.
     :param wait_for_completion: If true, waits for the job to start before returning. Defaults to True.
-    :param aws_conn_id: AWS connection to use
+        If set to False, ``waiter_countdown`` and ``waiter_check_interval_seconds`` will only be applied
+        when waiting for the application be to in the ``STARTED`` state.
+    :param aws_conn_id: AWS connection to use.
+    :param name: Name for the EMR Serverless job. If not provided, a default name will be assigned.
+    :param waiter_countdown: Total amount of time, in seconds, the operator will wait for
+        the job finish. Defaults to 25 minutes.
+    :param waiter_check_interval_seconds: Number of seconds between polling the state of the job.
+        Defaults to 60 seconds.
     """
 
     template_fields: Sequence[str] = (
         "application_id",
         "execution_role_arn",
         "job_driver",
+        "config",
         "configuration_overrides",
     )
 
@@ -153,11 +177,14 @@ class EmrServerlessStartJobOperator(BaseOperator):
         application_id: str,
         execution_role_arn: str,
         job_driver: dict,
-        configuration_overrides: Optional[dict],
+        configuration_overrides: dict | None,
         client_request_token: str = "",
-        config: Optional[dict] = None,
+        config: dict | None = None,
         wait_for_completion: bool = True,
         aws_conn_id: str = "aws_default",
+        name: str | None = None,
+        waiter_countdown: int = 25 * 60,
+        waiter_check_interval_seconds: int = 60,
         **kwargs,
     ):
         self.aws_conn_id = aws_conn_id
@@ -167,6 +194,11 @@ class EmrServerlessStartJobOperator(BaseOperator):
         self.configuration_overrides = configuration_overrides
         self.wait_for_completion = wait_for_completion
         self.config = config or {}
+        self.name = name or self.config.pop(
+            "name", f"emr_serverless_job_airflow_{uuid4()}"
+        )
+        self.waiter_countdown = waiter_countdown
+        self.waiter_check_interval_seconds = waiter_check_interval_seconds
         super().__init__(**kwargs)
 
         self.client_request_token = client_request_token or str(uuid4())
@@ -176,13 +208,13 @@ class EmrServerlessStartJobOperator(BaseOperator):
         """Create and return an EmrServerlessHook."""
         return EmrServerlessHook(aws_conn_id=self.aws_conn_id)
 
-    def execute(self, context: "Context") -> Dict:
+    def execute(self, context: Context) -> dict:
         self.log.info("Starting job on Application: %s", self.application_id)
 
         app_state = self.hook.conn.get_application(applicationId=self.application_id)[
             "application"
         ]["state"]
-        if app_state not in EmrServerlessApplicationSensor.SUCCESS_STATES:
+        if app_state not in EmrServerlessHook.APPLICATION_SUCCESS_STATES:
             self.hook.conn.start_application(applicationId=self.application_id)
 
             self.hook.waiter(
@@ -190,9 +222,11 @@ class EmrServerlessStartJobOperator(BaseOperator):
                 get_state_args={"applicationId": self.application_id},
                 parse_response=["application", "state"],
                 desired_state={"STARTED"},
-                failure_states=EmrServerlessApplicationSensor.FAILURE_STATES,
+                failure_states=EmrServerlessHook.APPLICATION_FAILURE_STATES,
                 object_type="application",
                 action="started",
+                countdown=self.waiter_countdown,
+                check_interval_seconds=self.waiter_check_interval_seconds,
             )
 
         response = self.hook.conn.start_job_run(
@@ -201,6 +235,7 @@ class EmrServerlessStartJobOperator(BaseOperator):
             executionRoleArn=self.execution_role_arn,
             jobDriver=self.job_driver,
             configurationOverrides=self.configuration_overrides,
+            name=self.name,
             **self.config,
         )
 
@@ -217,10 +252,12 @@ class EmrServerlessStartJobOperator(BaseOperator):
                     "jobRunId": response["jobRunId"],
                 },
                 parse_response=["jobRun", "state"],
-                desired_state=EmrServerlessJobSensor.SUCCESS_STATES,
-                failure_states=EmrServerlessJobSensor.FAILURE_STATES,
+                desired_state=EmrServerlessHook.JOB_SUCCESS_STATES,
+                failure_states=EmrServerlessHook.JOB_FAILURE_STATES,
                 object_type="job",
                 action="run",
+                countdown=self.waiter_countdown,
+                check_interval_seconds=self.waiter_check_interval_seconds,
             )
         return response["jobRunId"]
 
@@ -228,12 +265,18 @@ class EmrServerlessStartJobOperator(BaseOperator):
 class EmrServerlessDeleteApplicationOperator(BaseOperator):
     """
     Operator to delete EMR Serverless application
+
     .. seealso::
         For more information on how to use this operator, take a look at the guide:
         :ref:`howto/operator:EmrServerlessDeleteApplicationOperator`
+
     :param application_id: ID of the EMR Serverless application to delete.
     :param wait_for_completion: If true, wait for the Application to start before returning. Default to True
     :param aws_conn_id: AWS connection to use
+    :param waiter_countdown: Total amount of time, in seconds, the operator will wait for
+        the application be deleted. Defaults to 25 minutes.
+    :param waiter_check_interval_seconds: Number of seconds between polling the state of the application.
+        Defaults to 60 seconds.
     """
 
     template_fields: Sequence[str] = ("application_id",)
@@ -243,11 +286,15 @@ class EmrServerlessDeleteApplicationOperator(BaseOperator):
         application_id: str,
         wait_for_completion: bool = True,
         aws_conn_id: str = "aws_default",
+        waiter_countdown: int = 25 * 60,
+        waiter_check_interval_seconds: int = 60,
         **kwargs,
     ):
         self.aws_conn_id = aws_conn_id
         self.application_id = application_id
         self.wait_for_completion = wait_for_completion
+        self.waiter_countdown = waiter_countdown
+        self.waiter_check_interval_seconds = waiter_check_interval_seconds
         super().__init__(**kwargs)
 
     @cached_property
@@ -255,7 +302,7 @@ class EmrServerlessDeleteApplicationOperator(BaseOperator):
         """Create and return an EmrServerlessHook."""
         return EmrServerlessHook(aws_conn_id=self.aws_conn_id)
 
-    def execute(self, context: "Context") -> None:
+    def execute(self, context: Context) -> None:
         self.log.info("Stopping application: %s", self.application_id)
         self.hook.conn.stop_application(applicationId=self.application_id)
 
@@ -266,10 +313,12 @@ class EmrServerlessDeleteApplicationOperator(BaseOperator):
                 "applicationId": self.application_id,
             },
             parse_response=["application", "state"],
-            desired_state=EmrServerlessApplicationSensor.FAILURE_STATES,
+            desired_state=EmrServerlessHook.APPLICATION_FAILURE_STATES,
             failure_states=set(),
             object_type="application",
             action="stopped",
+            countdown=self.waiter_countdown,
+            check_interval_seconds=self.waiter_check_interval_seconds,
         )
 
         self.log.info("Deleting application: %s", self.application_id)
@@ -285,9 +334,11 @@ class EmrServerlessDeleteApplicationOperator(BaseOperator):
                 get_state_args={"applicationId": self.application_id},
                 parse_response=["application", "state"],
                 desired_state={"TERMINATED"},
-                failure_states=EmrServerlessApplicationSensor.FAILURE_STATES,
+                failure_states=EmrServerlessHook.APPLICATION_FAILURE_STATES,
                 object_type="application",
                 action="deleted",
+                countdown=self.waiter_countdown,
+                check_interval_seconds=self.waiter_check_interval_seconds,
             )
 
         self.log.info("EMR serverless application deleted")

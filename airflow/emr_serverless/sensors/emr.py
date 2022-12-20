@@ -15,6 +15,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from __future__ import annotations
+
 import sys
 from typing import TYPE_CHECKING, Any, Dict, FrozenSet, Optional, Sequence, Set, Union
 
@@ -36,19 +38,16 @@ class EmrServerlessJobSensor(BaseSensorOperator):
     """
     Asks for the state of the job run until it reaches a failure state or success state.
     If the job run fails, the task will fail.
+
     .. seealso::
         For more information on how to use this sensor, take a look at the guide:
         :ref:`howto/sensor:EmrServerlessJobSensor`
+
     :param application_id: application_id to check the state of
     :param job_run_id: job_run_id to check the state of
     :param target_states: a set of states to wait for, defaults to 'SUCCESS'
     :param aws_conn_id: aws connection to use, defaults to 'aws_default'
     """
-
-    INTERMEDIATE_STATES = {"PENDING", "RUNNING", "SCHEDULED", "SUBMITTED"}
-    FAILURE_STATES = {"FAILED", "CANCELLING", "CANCELLED"}
-    SUCCESS_STATES = {"SUCCESS"}
-    TERMINAL_STATES = SUCCESS_STATES.union(FAILURE_STATES)
 
     template_fields: Sequence[str] = (
         "application_id",
@@ -60,7 +59,8 @@ class EmrServerlessJobSensor(BaseSensorOperator):
         *,
         application_id: str,
         job_run_id: str,
-        target_states: Union[Set, FrozenSet] = frozenset(SUCCESS_STATES),
+        target_states: set
+        | frozenset = frozenset(EmrServerlessHook.JOB_SUCCESS_STATES),
         aws_conn_id: str = "aws_default",
         **kwargs: Any,
     ) -> None:
@@ -70,14 +70,14 @@ class EmrServerlessJobSensor(BaseSensorOperator):
         self.job_run_id = job_run_id
         super().__init__(**kwargs)
 
-    def poke(self, context: "Context") -> bool:
+    def poke(self, context: Context) -> bool:
         response = self.hook.conn.get_job_run(
             applicationId=self.application_id, jobRunId=self.job_run_id
         )
 
         state = response["jobRun"]["state"]
 
-        if state in self.FAILURE_STATES:
+        if state in EmrServerlessHook.JOB_FAILURE_STATES:
             failure_message = f"EMR Serverless job failed: {self.failure_message_from_response(response)}"
             raise AirflowException(failure_message)
 
@@ -89,12 +89,12 @@ class EmrServerlessJobSensor(BaseSensorOperator):
         return EmrServerlessHook(aws_conn_id=self.aws_conn_id)
 
     @staticmethod
-    def failure_message_from_response(response: Dict[str, Any]) -> Optional[str]:
+    def failure_message_from_response(response: dict[str, Any]) -> str | None:
         """
         Get failure message from response dictionary.
+
         :param response: response from AWS API
         :return: failure message
-        :rtype: Optional[str]
         """
         return response["jobRun"]["stateDetails"]
 
@@ -103,9 +103,11 @@ class EmrServerlessApplicationSensor(BaseSensorOperator):
     """
     Asks for the state of the application until it reaches a failure state or success state.
     If the application fails, the task will fail.
+
     .. seealso::
         For more information on how to use this sensor, take a look at the guide:
         :ref:`howto/sensor:EmrServerlessApplicationSensor`
+
     :param application_id: application_id to check the state of
     :param target_states: a set of states to wait for, defaults to {'CREATED', 'STARTED'}
     :param aws_conn_id: aws connection to use, defaults to 'aws_default'
@@ -113,15 +115,12 @@ class EmrServerlessApplicationSensor(BaseSensorOperator):
 
     template_fields: Sequence[str] = ("application_id",)
 
-    INTERMEDIATE_STATES = {"CREATING", "STARTING", "STOPPING"}
-    FAILURE_STATES = {"STOPPED", "TERMINATED"}
-    SUCCESS_STATES = {"CREATED", "STARTED"}
-
     def __init__(
         self,
         *,
         application_id: str,
-        target_states: Union[Set, FrozenSet] = frozenset(SUCCESS_STATES),
+        target_states: set
+        | frozenset = frozenset(EmrServerlessHook.APPLICATION_SUCCESS_STATES),
         aws_conn_id: str = "aws_default",
         **kwargs: Any,
     ) -> None:
@@ -130,14 +129,12 @@ class EmrServerlessApplicationSensor(BaseSensorOperator):
         self.application_id = application_id
         super().__init__(**kwargs)
 
-    def poke(self, context: "Context") -> bool:
-        state = None
-
+    def poke(self, context: Context) -> bool:
         response = self.hook.conn.get_application(applicationId=self.application_id)
 
         state = response["application"]["state"]
 
-        if state in self.FAILURE_STATES:
+        if state in EmrServerlessHook.APPLICATION_FAILURE_STATES:
             failure_message = f"EMR Serverless job failed: {self.failure_message_from_response(response)}"
             raise AirflowException(failure_message)
 
@@ -149,11 +146,11 @@ class EmrServerlessApplicationSensor(BaseSensorOperator):
         return EmrServerlessHook(aws_conn_id=self.aws_conn_id)
 
     @staticmethod
-    def failure_message_from_response(response: Dict[str, Any]) -> Optional[str]:
+    def failure_message_from_response(response: dict[str, Any]) -> str | None:
         """
         Get failure message from response dictionary.
+
         :param response: response from AWS API
         :return: failure message
-        :rtype: Optional[str]
         """
         return response["application"]["stateDetails"]
