@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from emr_serverless.operators.emr import (
+from airflow.providers.amazon.aws.operators.emr import (
     EmrServerlessCreateApplicationOperator,
     EmrServerlessDeleteApplicationOperator,
     EmrServerlessStartJobOperator,

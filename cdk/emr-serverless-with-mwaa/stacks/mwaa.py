@@ -72,7 +72,7 @@ class MwaaStack(cdk.Stack):
             self,
             "airflow-v2",
             name=mwaa_name,
-            airflow_version="2.2.2",
+            airflow_version="2.4.3",
             dag_s3_path=f"dags/",
             source_bucket_arn=bucket.bucket_arn,
             execution_role_arn=mwaa_service_role.role_arn,
