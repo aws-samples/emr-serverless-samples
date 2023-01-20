@@ -142,4 +142,6 @@ ALTER TABLE noaa_gsod_pds ADD IF NOT EXISTS
   PARTITION (year='2018') LOCATION 's3://noaa-gsod-pds/2018/'
   PARTITION (year='2019') LOCATION 's3://noaa-gsod-pds/2019/'
   PARTITION (year='2020') LOCATION 's3://noaa-gsod-pds/2020/'
-  PARTITION (year='2021') LOCATION 's3://noaa-gsod-pds/2021/';
+  PARTITION (year='2021') LOCATION 's3://noaa-gsod-pds/2021/'
+  PARTITION (year='2022') LOCATION 's3://noaa-gsod-pds/2022/'
+  PARTITION (year='2023') LOCATION 's3://noaa-gsod-pds/2023/';
