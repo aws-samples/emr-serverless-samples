@@ -20,7 +20,7 @@ from datetime import datetime
 
 from airflow import DAG
 from airflow.models import Variable
-from emr_serverless.operators.emr import EmrServerlessStartJobOperator
+from airflow.providers.amazon.aws.operators.emr import EmrServerlessStartJobOperator
 
 APPLICATION_ID = Variable.get("emr_serverless_application_id")
 JOB_ROLE_ARN = Variable.get("emr_serverless_job_role")
