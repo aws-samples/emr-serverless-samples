@@ -1,4 +1,4 @@
-# EMR Serverless Custom IMages
+# EMR Serverless Custom Images
 
 Custom images are now supported in EMR Serverless allowing you to make use of containers to create reproducible data pipelines.
 
