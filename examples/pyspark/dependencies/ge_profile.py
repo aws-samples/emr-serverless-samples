@@ -24,7 +24,7 @@ if __name__ == "__main__":
     output_path = sys.argv[1]
 
     # Read some trip data
-    df = spark.read.csv("s3://nyc-tlc/trip data/yellow*.csv", header=True)
+    df = spark.read.csv("s3://nyc-tlc/csv_backup/yellow*.csv", header=True)
     df.show()
 
     # Now profile it with Great Expectations and write the results to S3
