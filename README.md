@@ -148,6 +148,10 @@ _The following UIs are available in the EMR Serverless console, but you can stil
 
 - [Tez UI](/utilities/tez-ui/)- Use this Dockerfile to run Tez UI and Application Timeline Server in a container.
 
+## Other Resources
+
+- [Run a data processing job on Amazon EMR Serverless with AWS Step Functions](https://aws.amazon.com/blogs/big-data/run-a-data-processing-job-on-amazon-emr-serverless-with-aws-step-functions/)
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
