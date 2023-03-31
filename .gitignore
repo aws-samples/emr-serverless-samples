@@ -8,3 +8,5 @@ dist/
 # macOS detritus
 .DS_Store
 
+# config files
+.env
