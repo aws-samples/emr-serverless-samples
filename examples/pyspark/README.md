@@ -149,7 +149,7 @@ aws s3 ls s3://${S3_BUCKET}/logs/applications/$APPLICATION_ID/jobs/$JOB_RUN_ID/
 Or copy the stdout of the job.
 
 ```shell
-aws s3 cp s3://${S3_BUCKET}/logs/applications/$APPLICfATION_ID/jobs/$JOB_RUN_ID/SPARK_DRIVER/stdout.gz - | gunzip
+aws s3 cp s3://${S3_BUCKET}/logs/applications/$APPLICATION_ID/jobs/$JOB_RUN_ID/SPARK_DRIVER/stdout.gz - | gunzip
 ```
 
 ## Clean up
