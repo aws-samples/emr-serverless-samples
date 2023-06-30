@@ -54,6 +54,7 @@ with DAG(
         job_driver={
             "sparkSubmit": {
                 "entryPoint": "local:///usr/lib/spark/examples/src/main/python/pi.py",
+                "entryPointArguments": ["1000"],
             }
         },
         configuration_overrides=DEFAULT_MONITORING_CONFIG,
