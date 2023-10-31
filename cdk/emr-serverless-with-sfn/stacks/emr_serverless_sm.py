@@ -8,7 +8,9 @@ from constructs import Construct, IConstruct
 
 class EmrServerlessStateMachineConstruct(Construct):
     """
-    Construct for the EMR Serverless State Machine.
+    Construct for an EMR Serverless State Machine.
+    If asynchronous is set to True, a loop is implemented, waiting for the job to complete and check the exit code.
+    The loop can be extended with other steps while the job is running.
     """
 
     def __init__(
@@ -27,6 +29,7 @@ class EmrServerlessStateMachineConstruct(Construct):
         spark_job_submit_parameters: str,
         emr_execution_role_arn: str,
         wait_duration_in_seconds: int = 30,
+        asynchronous: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(scope, id)
@@ -42,10 +45,10 @@ class EmrServerlessStateMachineConstruct(Construct):
         )
         start_job_run_task = sfn.CustomState(
             self,
-            f"Submit Job",
+            f"Submit Job ({'Sync' if not asynchronous else 'Async'})",
             state_json={
                 "Type": "Task",
-                "Resource": "arn:aws:states:::aws-sdk:emrserverless:startJobRun",
+                "Resource": f"arn:aws:states:::emr-serverless:startJobRun{'.sync' if not asynchronous else ''}",
                 "Parameters": {
                     "ApplicationId": f"{emr_serverless_application_id}",
                     "ClientToken.$": "States.UUID()",
@@ -126,12 +129,15 @@ class EmrServerlessStateMachineConstruct(Construct):
             .otherwise(wait_step)
         )
 
-        sfn_definition = (
-            sfn.Chain.start(start_job_run_task)
-            .next(wait_step)
-            .next(check_job_status_step)
-            .next(choice_step)
-        )
+        if asynchronous:
+            sfn_definition = (
+                sfn.Chain.start(start_job_run_task)
+                .next(wait_step)
+                .next(check_job_status_step)
+                .next(choice_step)
+            )
+        else:
+            sfn_definition = sfn.Chain.start(start_job_run_task)
 
         self.state_machine = sfn.StateMachine(
             scope=self,

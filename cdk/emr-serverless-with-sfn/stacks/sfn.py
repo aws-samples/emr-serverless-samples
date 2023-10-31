@@ -94,6 +94,7 @@ class SfnEmrServerlessJobsStack(Stack):
             spark_job_arguments=[writer_output_path],
             spark_job_submit_parameters="--conf spark.driver.memory=1G",
             emr_execution_role_arn=emr_execution_role.role_arn,
+            asynchronous=True
         )
 
         job2 = EmrServerlessStateMachineConstruct(
@@ -108,6 +109,7 @@ class SfnEmrServerlessJobsStack(Stack):
             spark_job_arguments=[writer_output_path],
             spark_job_submit_parameters="--conf spark.driver.memory=1G",
             emr_execution_role_arn=emr_execution_role.role_arn,
+            asynchronous=False
         )
 
         writer_task = sfn.CustomState(
