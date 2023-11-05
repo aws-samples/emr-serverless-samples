@@ -55,7 +55,7 @@ The PySpark example jobs:
 
 ## Environments
 
-The solution is parametrized so that multiple deployments of the same stacks can co-exist in the same account under 
+The solution is parameterized so that multiple deployments of the same stacks can co-exist in the same account under 
 different names. That can be achieved by setting the `NAMESPACE` environment variable. By default, the NAMESPACE is set
 to `dev`, which configures resources to have "dev" in their name (usually as suffix).
 
