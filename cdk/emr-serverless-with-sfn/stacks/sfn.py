@@ -92,7 +92,7 @@ class SfnEmrServerlessJobsStack(Stack):
             spark_job_name="Writer",
             spark_job_entry_point=f"s3://{bucket.bucket_name}/jobs/{namespace}/pyspark-writer-example.py",
             spark_job_arguments=[writer_output_path],
-            spark_job_submit_parameters="--conf spark.driver.memory=1G",
+            spark_job_submit_parameters="--conf spark.dynamicAllocation.initialExecutors=1",
             emr_execution_role_arn=emr_execution_role.role_arn,
             asynchronous=True
         )
@@ -107,7 +107,7 @@ class SfnEmrServerlessJobsStack(Stack):
             spark_job_name="Reader",
             spark_job_entry_point=f"s3://{bucket.bucket_name}/jobs/{namespace}/pyspark-reader-example.py",
             spark_job_arguments=[writer_output_path],
-            spark_job_submit_parameters="--conf spark.driver.memory=1G",
+            spark_job_submit_parameters="--conf spark.dynamicAllocation.initialExecutors=1",
             emr_execution_role_arn=emr_execution_role.role_arn,
             asynchronous=False
         )
