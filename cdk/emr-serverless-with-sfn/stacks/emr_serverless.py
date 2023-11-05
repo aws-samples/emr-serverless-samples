@@ -19,7 +19,7 @@ class EMRServerlessStack(Stack):
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # Create an EMR 6.6.0 Spark application in a VPC with pre-initialized capacity
+        # Create an EMR 6.11.0 Spark application in a VPC with pre-initialized capacity
         self.serverless_app = emrs.CfnApplication(
             self,
             f"spark_app_{namespace}",
