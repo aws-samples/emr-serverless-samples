@@ -26,9 +26,14 @@ class SfnEmrServerlessJobsStack(Stack):
         namespace: str,
         **kwargs,
     ) -> None:
-        """This stack creates a simple EMR Serverless demo within Step Functions.
+        f"""This stack creates a simple EMR Serverless demo within Step Functions.
 
-        We create a state machine that submits... TODO continue description
+        Two example State Machines are created to submit EMR Serverless jobs in the same
+        EMR Serverless application. The first writes an example file and the second reads it back.
+        Submitting the jobs, the writer invokes the sparkJobRun API asynchronously, while the reader
+        is synchronous (more details in the project README). Both State Machines are run in sequence
+        by a third one, called 'MainStateMachine_${namespace}', which in this example must be
+        executed manually from the AWS console or CLI, with no additional parameters.
 
         :param scope: The scope of the stack.
         :param construct_id: The ID of the stack.
