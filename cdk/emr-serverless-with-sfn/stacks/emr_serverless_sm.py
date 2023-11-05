@@ -143,7 +143,7 @@ class EmrServerlessStateMachineConstruct(Construct):
             scope=self,
             id=state_machine_name,
             state_machine_name=state_machine_name,
-            definition=sfn_definition,
+            definition_body=sfn.DefinitionBody.from_chainable(sfn_definition),
         )
 
         # IAM Permissions

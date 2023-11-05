@@ -196,7 +196,7 @@ class SfnEmrServerlessJobsStack(Stack):
         sm = sfn.StateMachine(
             scope=self,
             id=f"main-state-machine-{namespace}",
-            definition=sfn_definition,
+            definition_body=sfn.DefinitionBody.from_chainable(sfn_definition),
             timeout=cdk.Duration.minutes(60),
             state_machine_name=f"MainStateMachine_{namespace}",
         )
