@@ -51,7 +51,7 @@ class EMRServerlessStack(Stack):
                 ),
             ],
             auto_stop_configuration=emrs.CfnApplication.AutoStopConfigurationProperty(
-                enabled=True, idle_timeout_minutes=100
+                enabled=True, idle_timeout_minutes=15
             ),
         )
 
