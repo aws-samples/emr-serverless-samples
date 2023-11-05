@@ -16,4 +16,4 @@ data = spark.range(100) \
     .withColumn("random_uuid", F.expr('replace(uuid(), "-", "")')) \
     .withColumn("random_double", F.rand())
 
-data.write.mode("overwrite").parquet(output_path)
+data.repartition(1).write.mode("overwrite").parquet(output_path)
