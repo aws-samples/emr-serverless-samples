@@ -53,6 +53,14 @@ The PySpark example jobs:
 - [./assets/jobs/pyspark-reader-example.py](./assets/jobs/pyspark-reader-example.py)
 - [./assets/jobs/pyspark-writer-example.py](./assets/jobs/pyspark-writer-example.py)
 
+## CloudWatch dashboards
+
+The CDK Stack in [./stacks/emr_serverless.py](./stacks/emr_serverless.py) creates [CloudWatch
+dashboards](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html) to monitor the
+EMR Serverless Application resources deployed by this project. These dashboards are taken from the
+[emr-serverless-with-mwaa](../emr-serverless-with-mwaa/README.md) CDK application which is available within the same
+aws-sample repository as this project.
+
 ## Environments
 
 The solution is parameterized so that multiple deployments of the same stacks can co-exist in the same account under 
