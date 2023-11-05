@@ -36,16 +36,16 @@ class EMRServerlessStack(Stack):
                     value=emrs.CfnApplication.InitialCapacityConfigProperty(
                         worker_count=2,
                         worker_configuration=emrs.CfnApplication.WorkerConfigurationProperty(
-                            cpu="4vCPU", memory="16gb"
+                            cpu="2vCPU", memory="4gb"
                         ),
                     ),
                 ),
                 emrs.CfnApplication.InitialCapacityConfigKeyValuePairProperty(
                     key="Executor",
                     value=emrs.CfnApplication.InitialCapacityConfigProperty(
-                        worker_count=10,
+                        worker_count=4,
                         worker_configuration=emrs.CfnApplication.WorkerConfigurationProperty(
-                            cpu="4vCPU", memory="16gb"
+                            cpu="2vCPU", memory="4gb"
                         ),
                     ),
                 ),
