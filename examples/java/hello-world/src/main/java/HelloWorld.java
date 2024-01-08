@@ -1,4 +1,7 @@
+package com.amazon.damon;
+
 import org.apache.spark.sql.SparkSession;
+
 
 public class HelloWorld {
   public static void main(String[] args) {

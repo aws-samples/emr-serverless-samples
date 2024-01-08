@@ -2,7 +2,8 @@
 
 As of `apache-airflow-providers-amazon==5.0.0`, the EMR Serverless Operator is now part of the official [Apache Airflow Amazon Provider](https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/index.html) and has been tested with open source Apache Airflow v2.2.2.
 
-> **Warning** The operator in this repository is no longer maintained.
+> [!CAUTION]
+> The operator in this repository is no longer maintained.
 
 ## Amazon Managed Workflows for Apache Airflow (MWAA)
 
@@ -15,7 +16,8 @@ apache-airflow-providers-amazon==6.0.0
 boto3>=1.23.9
 ```
 
-> **Note** `boto3>=1.23.9` is required for EMR Serverless support
+> [!IMPORTANT]
+> `boto3>=1.23.9` is required for EMR Serverless support
 
 ## Example DAGs
 

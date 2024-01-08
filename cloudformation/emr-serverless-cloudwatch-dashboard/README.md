@@ -98,7 +98,8 @@ Let's take a quick look and see how we can use the dashboard to optimize our EMR
 
 In this example, we'll start an application with a limited set of pre-initialized capacity and run jobs that both fit and exceed that capacity and see what happens.
 
-> **Note**: EMR Serverless sends metrics to Amazon CloudWatch every 1 minute, so you may see different behavior depending on how quickly you run the commands.
+> [!NOTE]
+> EMR Serverless sends metrics to Amazon CloudWatch every 1 minute, so you may see different behavior depending on how quickly you run the commands.
 
 ### Pre-requisites
 

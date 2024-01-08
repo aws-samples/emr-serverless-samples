@@ -6,7 +6,8 @@ In this example, we use a simple example of adding the `seaborn` library to buil
 
 ## Pre-requisities
 
-> **Note** This example is intended to be run in the `us-east-1` region as it reads data from [NOAA Global Surface Summary of Day dataset](https://registry.opendata.aws/noaa-gsod/) from the Registry of Open Data.
+> [!IMPORTANT]
+> This example is intended to be run in the `us-east-1` region as it reads data from [NOAA Global Surface Summary of Day dataset](https://registry.opendata.aws/noaa-gsod/) from the Registry of Open Data.
 
 In order to make use of custom images in EMR, you'll need to have:
 - a local installation of Docker to build your image

@@ -1,6 +1,9 @@
 # Custom Python versions on EMR Serverless
 
-Occasionally, you'll require a specific Python version. While EMR Serverless uses Python 3.7.10 by default, you can upgrade by building your own virtual environment with the desired version and copying the binaries when you package your virtual environment.
+> [!IMPORTANT]
+> EMR release 7.x now supports Python 3.9.x by default. To change the Python version in 7.x releases, use `public.ecr.aws/amazonlinux/amazonlinux:2023-minimal` as your base image.
+
+Occasionally, you'll require a specific Python version. While EMR Serverless uses Python 3.7.x by default, you can upgrade by building your own virtual environment with the desired version and copying the binaries when you package your virtual environment.
 
 Let's say you want to make use of the new `match` statements in Python 3.10 - We'll use a Dockerfile to install Python 3.10.6 and create our custom virtual environment.
 

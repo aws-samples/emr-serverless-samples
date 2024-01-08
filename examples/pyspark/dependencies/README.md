@@ -8,7 +8,13 @@ You can create isolated Python virtual environments to package multiple Python l
 - [Docker](https://www.docker.com/get-started) with the [BuildKit backend](https://docs.docker.com/engine/reference/builder/#buildkit)
 - An S3 bucket in `us-east-1` and an IAM Role to run your EMR Serverless jobs
 
-> **Note**: If using Docker on Apple Silicon ensure you use `--platform linux/amd64`
+> [!IMPORTANT]
+> This example is intended to be run in the `us-east-1` region as it reads data from [New York City Taxi dataset](https://registry.opendata.aws/nyc-tlc-trip-records-pds/) from the Registry of Open Data. If your EMR Serverless application is in a different region, you must [configure networking](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/vpc-access.html).
+
+> [!IMPORTANT]
+> The default [Dockerfile](./Dockerfile) is configured to use `linux/amd64`
+> If using Graviton, update to use `linux/arm64` or pass `--platform linux/arm64` to the `docker build` command. See the [EMR Serverless architecture options](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/architecture.html) for more detail.
+> If using EMR 7.x, you must use Amazon Linux 2023 as the base image instead of Amazon Linux 2. A sample file is provided in [Dockerfile.al2023](./Dockerfile.al2023).
 
 Set the following variables according to your environment.
 
@@ -27,8 +33,6 @@ All the commands below should be executed in this (`examples/pyspark/dependencie
 1. Build your virtualenv archive
 
 This command builds the included `Dockerfile` and exports the resulting `pyspark_ge.tar.gz` file to your local filesystem.
-
-> **Note** The included [Dockerfile](./Dockerfile) builds for x86 - if you would like to build for Graviton, update the Dockerfile to use `linux/arm64` as the platform and see the [EMR Serverless architecture options](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/architecture.html) for more detail.
 
 ```shell
 # Enable BuildKit backend
@@ -123,7 +127,8 @@ _This approach can also be used with EMR release label `emr-6.6.0`._
 
 To do this, we'll create a [`pom.xml`](./pom.xml) that specifies our dependencies and use a [maven Docker container](./Dockerfile.jars) to build the uberjar. In this example, we'll package `org.postgresql:postgresql:42.4.0` and use the example script in [./pg_query.py](./pg_query.py) to query a Postgres database.
 
-> **Note**: The code in `pg_query.py` is for demonstration purposes only - never store credentials directly in your code. 😁
+> [!TIP]
+> The code in `pg_query.py` is for demonstration purposes only - never store credentials directly in your code. 😁
 
 1. Build an uberjar with your dependencies
 

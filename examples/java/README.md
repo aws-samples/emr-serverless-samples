@@ -92,7 +92,7 @@ aws emr-serverless start-job-run \
     }'
 ```
 
-> **Note**: We don't specify any Spark CPU or memory configurations - the defaults [defined here](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults) fit into the pre-init capacity we created above. We used a value of `16GB` for our pre-init capacity because the Spark default is `14GB` plus 10% for Spark memory overhead.
+> [!TIP] We don't specify any Spark CPU or memory configurations - the defaults [defined here](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults) fit into the pre-init capacity we created above. We used a value of `16GB` for our pre-init capacity because the Spark default is `14GB` plus 10% for Spark memory overhead.
 
 ## Clean up
 
