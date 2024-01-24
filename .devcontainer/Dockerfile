@@ -1,5 +1,6 @@
 ARG RELEASE="emr-7.0.0"
 ARG RELEASE_TAG="latest"
+ARG TARGETARCH
 
 FROM public.ecr.aws/emr-serverless/spark/${RELEASE}:${RELEASE_TAG}
 
