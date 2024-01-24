@@ -6,7 +6,7 @@
 			"RELEASE": "emr-7.0.0",
 			"RELEASE_TAG": "latest"
 		}
-	}
-	"postStartCommand": "sudo /usr/lib/spark/sbin/start-history-server.sh"
+	},
+	"postStartCommand": "sudo /usr/lib/spark/sbin/start-history-server.sh",
 	"forwardPorts": [18080]
 }
