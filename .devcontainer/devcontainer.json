@@ -1,7 +1,7 @@
 {
 	"name": "emr-serverless",
 	"build": {
-		"dockerfile": "Dockerfile"
+		"dockerfile": "Dockerfile",
 		"args": {
 			"RELEASE": "emr-7.0.0",
 			"RELEASE_TAG": "latest"
