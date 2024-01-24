@@ -1,8 +1,8 @@
 ARG RELEASE="emr-7.0.0"
 ARG RELEASE_TAG="latest"
-ARG TARGETARCH
 
 FROM public.ecr.aws/emr-serverless/spark/${RELEASE}:${RELEASE_TAG}
+ARG TARGETARCH
 
 # Switch to the root user
 USER root
@@ -45,3 +45,6 @@ RUN python3 -m pip install \
 
 # Switch back to the default user
 USER hadoop:hadoop
+
+# Set the entrypoint for local dev
+ENTRYPOINT "/bin/bash"
