@@ -1,0 +1,362 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+AWSTemplateFormatVersion: 2010-09-09
+Description: EMR Serverless, Lake Formation, and Apache Iceberg full deployment stack
+
+Parameters:
+  DatalakeAdminRole:
+    Type: String
+    Description: The IAM role to use as the Lake Formation admin - must be the same as the role used for CloudFormation.
+    AllowedPattern: ^arn:aws:iam::\d{12}:role/.*$
+    ConstraintDescription: Must be a valid IAM role ARN.
+  RetainDataLakeAdminPermissions:
+    Type: String
+    Description: Whether to leave the DatalakeAdminRole as a Lake Formation admin - recommended if the provided role is already an admin, otherwise your permissions will be removed when the stack is deleted.
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    ConstraintDescription: Must be true or false
+
+Conditions:
+  ShouldRetainAdminPermissions:
+    Fn::Equals:
+      - { Ref: "RetainDataLakeAdminPermissions" }
+      - "true"
+
+Resources:
+  # Lake Formation Data Bucket
+  LakeFormationDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        !Join [
+          "-",
+          [
+            emrs-lf-data,
+            !Select [
+              4,
+              !Split ["-", !Select [2, !Split ["/", !Ref AWS::StackId]]],
+            ],
+          ],
+        ]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+
+  # Lake Formation user-defined IAM role for registering locations
+  # Required when using LF with EMR: https://docs.aws.amazon.com/lake-formation/latest/dg/registration-role.html
+  LakeFormationRegistrationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        !Join [
+          "",
+          [
+            EMRLakeFormationRegistrationRole,
+            !Select [
+              4,
+              !Split ["-", !Select [2, !Split ["/", !Ref AWS::StackId]]],
+            ],
+          ],
+        ]
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lakeformation.amazonaws.com
+                - glue.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Description: "Lake Formation user-defined IAM role for registering locations"
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "s3:ListBucket"
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${LakeFormationDataBucket}"
+              - Effect: Allow
+                Action:
+                  - "s3:PutObject"
+                  - "s3:GetObject"
+                  - "s3:DeleteObject"
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${LakeFormationDataBucket}/*"
+        - PolicyName: CloudWatch
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:CreateLogGroup"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws-lakeformation-acceleration/*"
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws-lakeformation-acceleration/*:log-stream:*"
+
+  # Lake Formation Location aka Data lake location (registered to data bucket)
+  LFDataLakeLocation1:
+    Type: AWS::LakeFormation::Resource
+    Properties:
+      ResourceArn: !Sub arn:${AWS::Partition}:s3:::${LakeFormationDataBucket}
+      RoleArn: !GetAtt LakeFormationRegistrationRole.Arn
+      UseServiceLinkedRole: false
+
+  # Grant the DatalakeAdminRole as a Lake Formation Admin
+  # In case this role is _already_ an admin, we do not remove admin permissions.
+  LFAdminSettings:
+    Type: AWS::LakeFormation::DataLakeSettings
+    DeletionPolicy: !If
+      - ShouldRetainAdminPermissions
+      - Retain
+      - Delete
+    UpdateReplacePolicy: !If
+      - ShouldRetainAdminPermissions
+      - Retain
+      - Delete
+    Properties:
+      Admins:
+        - DataLakePrincipalIdentifier: !Ref DatalakeAdminRole
+
+  # Lake Formation database + Iceberg table
+  LFDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: emrs_lakeformation
+        Description: EMR Serverless Lake Formation Demo
+        CreateTableDefaultPermissions: []
+
+  # Before we create the table, we need to grant permission to the data location
+  # NOTE: It's important that the trailing slash be left off the `ResourceArn` or the CFN stack won't stabilize
+  IcebergTableS3Permission:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    DependsOn: [LFAdminSettings, LFDataLakeLocation1]
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !Ref DatalakeAdminRole
+      Resource:
+        DataLocation:
+          CatalogId: !Ref AWS::AccountId
+          ResourceArn: !Sub "${LakeFormationDataBucket.Arn}/data/iceberg_table"
+      Permissions:
+        - "DATA_LOCATION_ACCESS"
+      PermissionsWithGrantOption: []
+
+  # Iceberg table for EMR Serverless Lake Formation Demo
+  LFIcebergTable:
+    Type: AWS::Glue::Table
+    DependsOn: IcebergTableS3Permission
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName: !Ref LFDatabase
+      OpenTableFormatInput:
+        IcebergInput:
+          MetadataOperation: CREATE
+          Version: 2
+      TableInput:
+        Description: Iceberg table for EMR Serverless Lake Formation Demo
+        Name: iceberg_table
+        TableType: EXTERNAL_TABLE
+        StorageDescriptor:
+          Location: !Sub s3://${LakeFormationDataBucket}/data/iceberg_table
+          Columns:
+            - Name: id
+              Type: bigint
+            - Name: secret
+              Type: string
+
+  # S3 Bucket for EMR Serverless code artifacts and logs
+  EMRServerlessBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        !Join [
+          "-",
+          [
+            emrs-lf-artifacts,
+            !Select [
+              4,
+              !Split ["-", !Select [2, !Split ["/", !Ref AWS::StackId]]],
+            ],
+          ],
+        ]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+
+  # EMR Serverless job execution role
+  EMRServerlessJobRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        !Join [
+          "-",
+          [
+            EMRServerlessJobRole,
+            !Select [
+              4,
+              !Split ["-", !Select [2, !Split ["/", !Ref AWS::StackId]]],
+            ],
+          ],
+        ]
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - emr-serverless.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Description: "Service role for EMR Serverless"
+      Policies:
+        - PolicyName: DatalakeUserBasic
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - lakeformation:GetDataAccess
+                  - glue:GetDatabase
+                  - glue:GetDatabases
+                  - glue:GetTable
+                  - glue:GetTables
+                  - glue:GetTableVersions
+                  - glue:SearchTables
+                  - glue:UpdateTable
+                  - glue:GetPartitions
+                  - lakeformation:GetResourceLFTags
+                  - lakeformation:ListLFTags
+                  - lakeformation:GetLFTag
+                  - lakeformation:SearchTablesByLFTag
+                  - lakeformation:SearchDatabasesByLFTags
+                Resource: "*"
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "s3:ListBucket"
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${EMRServerlessBucket}"
+              - Effect: Allow
+                Action:
+                  - "s3:PutObject"
+                  - "s3:GetObject"
+                  - "s3:DeleteObject"
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${EMRServerlessBucket}/*"
+
+
+
+
+  # EMR Serverless Spark application for Lake Formation demo
+  # Pre-configured with Lake Formation and Iceberg
+  SparkApplication:
+    Type: AWS::EMRServerless::Application
+    Properties:
+      Name: lakeformation-spark
+      ReleaseLabel: emr-6.15.0
+      Type: Spark
+      AutoStartConfiguration:
+        Enabled: true
+      AutoStopConfiguration:
+        Enabled: true
+        IdleTimeoutMinutes: 15
+      RuntimeConfiguration:
+        - Classification: spark-defaults
+          Properties:
+            # Enable Lake Formation, which also enables Glue Data Catalog
+            spark.emr-serverless.lakeformation.enabled: true
+            # Use Java 17
+            spark.emr-serverless.driverEnv.JAVA_HOME: /usr/lib/jvm/java-17-amazon-corretto.x86_64/
+            spark.executorEnv.JAVA_HOME: /usr/lib/jvm/java-17-amazon-corretto.x86_64/
+            # Default to Iceberg tables
+            spark.sql.catalog.spark_catalog: org.apache.iceberg.spark.SparkSessionCatalog
+            spark.sql.catalog.spark_catalog.client.region: !Ref AWS::Region
+            spark.sql.catalog.spark_catalog.glue.account-id: !Ref AWS::AccountId
+      InitialCapacity:
+        - Key: Driver
+          Value:
+            WorkerCount: 2
+            WorkerConfiguration:
+              Cpu: 2 vCPU
+              Memory: 4 GB
+              Disk: 20 GB
+        - Key: Executor
+          Value:
+            WorkerCount: 4
+            WorkerConfiguration:
+              Cpu: 2 vCPU
+              Memory: 4 GB
+              Disk: 20 GB
+
+  # Grant EMRServerlessJobRole permission to query our table
+  # First, DESCRIBE on the database
+  EMRServerlessDatabasePermission:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    DependsOn: LFAdminSettings
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !GetAtt EMRServerlessJobRole.Arn
+      Resource:
+        Database:
+          CatalogId: !Ref AWS::AccountId
+          Name: !Ref LFDatabase
+      Permissions:
+        - "DESCRIBE"
+      PermissionsWithGrantOption: []
+
+  # Grant data location access for the table
+  IcebergEMRServerlessTableS3Permission:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    DependsOn: [LFAdminSettings, LFDataLakeLocation1]
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !GetAtt EMRServerlessJobRole.Arn
+      Resource:
+        DataLocation:
+          CatalogId: !Ref AWS::AccountId
+          ResourceArn: !Sub "${LakeFormationDataBucket.Arn}/data/iceberg_table"
+      Permissions:
+        - "DATA_LOCATION_ACCESS"
+      PermissionsWithGrantOption: []
+
+  # Grant SELECT on the table, but only for the id column
+  EMRServerlessTablePermission:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    DependsOn: [IcebergEMRServerlessTableS3Permission, LFAdminSettings]
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !GetAtt EMRServerlessJobRole.Arn
+      Resource:
+        TableWithColumns:
+          CatalogId: !Ref AWS::AccountId
+          DatabaseName: !Ref LFDatabase
+          Name: !Ref LFIcebergTable
+          ColumnNames:
+            - "id"
+          # Or ColumnWildcard: { "ExcludedColumnNames": ["secret"] }
+      Permissions:
+        - "SELECT"
+      PermissionsWithGrantOption: []
+
+Outputs:
+  ApplicationId:
+    Value: !Ref SparkApplication
+  JobRoleArn:
+    Value: !GetAtt EMRServerlessJobRole.Arn
+  EMRArtifactsBucket:
+    Value: !Ref EMRServerlessBucket
