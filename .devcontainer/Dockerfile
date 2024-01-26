@@ -40,6 +40,7 @@ RUN dnf remove -y python3-pip && python3 -m ensurepip --upgrade && python3 -m pi
 
 # Enable Jupyter notebooks and pytest
 RUN python3 -m pip install \
+     emr-cli \
      ipykernel \
      pytest
 
