@@ -1,4 +1,4 @@
-# EMR Serverless with Lake Formation for fine-graned access control
+# EMR Serverless with Lake Formation for fine-grained access control
 
 As of Amazon EMR 6.15.0, you can now use [AWS Lake Formation with EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless-lf-enable.html) to apply fine-grained access controls on Data Catalog tables backed by S3.
 
