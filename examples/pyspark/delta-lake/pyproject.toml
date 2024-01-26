@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "delta-lake"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+boto3 = "^1.26.100"
+delta-spark = "2.1.0"
+emr-cli = ">=0.0.16,<0.1.0"
+
+[tool.poetry.group.dev.dependencies]
+pyspark = "3.3.0"
+emr-cli = ">=0.0.16,<0.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
