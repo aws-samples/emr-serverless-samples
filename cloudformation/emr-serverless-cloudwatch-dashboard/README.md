@@ -109,7 +109,7 @@ The sample Cloudwatch Dashboard provides the following functionality:
     - Timeline view of Storage Read Bytes by each Job
     - Timeline view of Storage Write Bytes by each Job
 
-![Screenshot of Job Worker Metrics - Executor](images/job_worker_metrics_Executor.jpg "Job Worker Metrics - Executor")
+![Screenshot of Job Worker Metrics - Executor](images/job_worker_metrics_Executor.jpeg "Job Worker Metrics - Executor")
 
 ## Example Walkthrough
 
