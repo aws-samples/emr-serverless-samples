@@ -45,6 +45,7 @@ The sample Cloudwatch Dashboard provides the following functionality:
   -  Point in time view of Available Workers (Drivers + Executors)
   -  Point in time view of Running Drivers
   -  Point in time view of Running Executors
+  -  Point in time view of Job Worker Metrics (Drivers + Executors)
  
  ![Screenshot of snapshot metrics for available workers and running Drivers and Executors](images/snapshot_metrics.png "Capacity Utilization Snapshot view")
 
@@ -91,6 +92,24 @@ The sample Cloudwatch Dashboard provides the following functionality:
     - Timeline view of Cancelled Jobs
 
 ![Screenshot of Job Metrics](images/job-metrics-breakdown.png "Job Metrics")
+
+- Job Woker Metrics - Driver
+    - Timeline view of CPU Allocated and Used by each Job
+    - Timeline view of Memory Allocated and Used by each Job
+    - Timeline view of Storage Allocated and Used by each Job
+    - Timeline view of Storage Read Bytes by each Job
+    - Timeline view of Storage Write Bytes by each Job
+
+![Screenshot of Job Worker Metrics - Driver](images/job_worker_metrics_Driver.jpg "Job Worker Metrics - Driver")
+
+- Job Woker Metrics - Executor
+    - Timeline view of CPU Allocated and Used by each Job
+    - Timeline view of Memory Allocated and Used by each Job
+    - Timeline view of Storage Allocated and Used by each Job
+    - Timeline view of Storage Read Bytes by each Job
+    - Timeline view of Storage Write Bytes by each Job
+
+![Screenshot of Job Worker Metrics - Executor](images/job_worker_metrics_Executor.jpg "Job Worker Metrics - Executor")
 
 ## Example Walkthrough
 
