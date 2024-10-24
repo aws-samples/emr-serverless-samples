@@ -22,7 +22,7 @@ aws emr-serverless start-job-run \
 
 Lets deploy a sample streaming job that reads from Kinesis Data Stream. We will use Kinesis Data Generator to submit records to the stream.
 
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/e929bd49-583d-4a71-b431-4fb5520f5e75">
+![architecture](../images/architecture-image.png)
 
 
 ### Pre-requisites:
@@ -77,11 +77,11 @@ The **Amazon Kinesis Data Generator** simplifies sending test data to your Kines
 ```
 4. Click on the **Send data** button.
 
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/ba1fcaac-8691-4840-84f1-a11c0d85d3e8">
+![properties](../images/kdg-image.png)
 
 ### Submit a Streaming Job to EMR Serverless Application from EMR Studio Console
 
-In this step, we will execute a streaming job, providing the location of `transactions.py` as part of the job arguments. The `transactions.py` file is a Spark Structured Streaming application designed to process data from a Kinesis Data Stream. It identifies high-volume transactions based on a 2-minute sliding window and a threshold of 5 transactions within that window. The application will output the results of this analysis to the console.
+In this step, we will execute a streaming job, providing the location of [`transactions.py`](./transactions.py) as part of the job arguments. The `transactions.py` file is a Spark Structured Streaming application designed to process data from a Kinesis Data Stream. It identifies high-volume transactions based on a 2-minute sliding window and a threshold of 5 transactions within that window. The application will output the results of this analysis to the console. Upload this script to S3 location.
 
 To submit a streaming job to your EMR Serverless application, follow these steps:
 
@@ -94,17 +94,25 @@ To submit a streaming job to your EMR Serverless application, follow these steps
 |-----|--------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
 | 1   | Name                                                                     | spark_streaming_job                                                                                              |
 | 2   | Runtime role                                                             | emr-serverless-runtime-role                                                                                      |
-| 3   | Script location S3 URI (location where transactions.py is stored)        | s3://us-east-1.elasticmapreduce/emr-containers/samples/wordcount/scripts/transactions.py                         |
+| 3   | Script location S3 URI (location where transactions.py is stored)        | s3://YourS3BucketName/transactions.py                         |
 | 4   | Script arguments                                                         | ["YourKinesisDataStreamName", "s3://YourS3DataBucketName/checkpoint-transactions"]                               |
 | 5   | Spark properties                                                         | --jars /usr/share/aws/kinesis/spark-sql-kinesis/lib/spark-streaming-sql-kinesis-connector.jar                    |
 
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/f403c25d-53bb-4390-a54d-b4d0f6b4b0d2">
+![properties](../images/emrs-properties-image.png)
 
 5. Make sure the test data is being sent to your Kinesis Data Stream. To view the output of the streaming job, click on **view logs → stdout**
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/bedd8687-1969-4256-b0f6-ff2565969cc9">
+   
+![properties](../images/viewlogs-image.png)
 
-6. It will open a new tab where you can see the output as below 
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/ce0c4080-cf89-4adf-b664-d5ab537bdfe5">
+7. It will open a new tab where you can see the output as below
+   
+![properties](../images/results-image.png)
 
 
+## Cleanup
+
+1. Terminate/Cancel the Submitted job to your EMR Serverless application.
+2. Stop the EMR Serverless application that you created as a part of this blog.
+3. Empty the S3 bucket `emrserverless-streaming-<<account-id>>` and `StagingS3Bucket` created as part of the workshop and delete the bucket. [Click here](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-bucket.html) to know more about how to delete an Amazon S3 bucket.
+4. Open up the [CloudFormation console](https://console.aws.amazon.com/cloudformation) and select the `EMRServerlessBlog` stack, then click on the **Delete** button to terminate the stack.
 
