@@ -1,0 +1,732 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This template creates an Amazon Cognito User Pool and Identity Pool, with a single user. It assigns a role to authenticated users in the identity pool to enable the users to use the Kinesis Data Generator tool. It also creates a S3 bucket named emrserverless-streaming-blog-<AccountId>-<Region> for storing data, various IAM policies and roles for EMR Serverless and EMR Studio, an EMR Serverless Application with spark runtime, VPC, Subnets, and Network Resources, and an EMR Studio
+Parameters:
+  Username:
+    Description: The username of the user you want to create in Amazon Cognito.
+    Type: String
+    AllowedPattern: ^(?=\s*\S).*$
+    ConstraintDescription: ' cannot be empty'
+  Password:
+    Description: The password of the user you want to create in Amazon Cognito.
+    Type: String
+    NoEcho: true
+    AllowedPattern: ^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$
+    ConstraintDescription: ' must be at least 6 alpha-numeric characters, and contain at least one number'
+  PermissionsBoundaryArn:
+    Description: OPTIONAL - IAM Permissions Boundary Policy ARN to attach to new IAM Roles
+    Type: String
+    Default: ''
+  EnvironmentName:
+    Type: String
+    Default: emrs
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Cognito User for Kinesis Data Generator
+        Parameters:
+          - Username
+          - Password
+      - Label:
+          default: Optional / Advanced Parameters (OK to ignore)
+        Parameters:
+          - PermissionsBoundaryArn
+Conditions:
+  SetPermissionsBoundary: !Not
+    - !Equals
+      - !Ref PermissionsBoundaryArn
+      - ''
+Mappings:
+  PrincipalMap:
+    aws-us-gov:
+      cognito: cognito-identity-us-gov.amazonaws.com
+    aws:
+      cognito: cognito-identity.amazonaws.com
+Resources:
+  KinesisDataStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      StreamModeDetails:
+        StreamMode: ON_DEMAND
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub emrserverless-streaming-blog-${AWS::AccountId}-${AWS::Region}
+  emrServerlessRuntimeRolePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - !Ref emrServerlessRunTimeRole
+      PolicyName: emr-serverless-s3-runtime-policy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ReadAccessForEMRSamples
+            Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:ListBucket
+            Resource:
+              - arn:aws:s3:::*.elasticmapreduce
+              - arn:aws:s3:::*.elasticmapreduce/*
+          - Sid: FullAccessToS3Bucket
+            Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:ListBucket
+              - s3:DeleteObject
+            Resource:
+              - !Sub arn:aws:s3:::emrserverless-streaming-blog-${AWS::AccountId}-${AWS::Region}/*
+              - !Sub arn:aws:s3:::emrserverless-streaming-blog-${AWS::AccountId}-${AWS::Region}
+          - Sid: GlueCreateAndReadDataCatalog
+            Effect: Allow
+            Action:
+              - glue:GetDatabase
+              - glue:CreateDatabase
+              - glue:GetDataBases
+              - glue:CreateTable
+              - glue:GetTable
+              - glue:UpdateTable
+              - glue:DeleteTable
+              - glue:GetTables
+              - glue:GetPartition
+              - glue:GetPartitions
+              - glue:CreatePartition
+              - glue:BatchCreatePartition
+              - glue:GetUserDefinedFunctions
+            Resource:
+              - '*'
+  emrServerlessRunTimeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: emr-serverless-runtime-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: emr-serverless.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonKinesisFullAccess
+      Path: /
+  emrStudioServicePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - !Ref emrStudioServiceRole
+      PolicyName: emr-studio-service-policy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ObjectActions
+            Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:DeleteObject
+            Resource:
+              - !Sub arn:aws:s3:::emrserverless-streaming-blog-${AWS::AccountId}-${AWS::Region}/*
+          - Sid: BucketActions
+            Effect: Allow
+            Action:
+              - s3:ListBucket
+              - s3:GetBucketEncryption
+              - s3:GetEncryptionConfiguration
+              - kms:Decrypt
+              - kms:GenerateDataKey
+              - kms:ReEncryptFrom
+              - kms:ReEncryptTo
+              - kms:DescribeKey
+            Resource:
+              - !Sub arn:aws:s3:::emrserverless-streaming-blog-${AWS::AccountId}-${AWS::Region}
+  emrStudioServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: emr-studio-service-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: elasticmapreduce.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonKinesisFullAccess
+  EMRWorkspaceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn: VPC
+    Properties:
+      GroupName: EMRWorkspaceSecurityGroup
+      GroupDescription: Security group attached to workspace to communicate with cluster
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+  EMREngineSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn: VPC
+    Properties:
+      GroupDescription: Security group attached to cluster master to communicate with workspace
+      GroupName: EMREngineSecurityGroup
+      VpcId: !Ref VPC
+  EMRStudio:
+    Type: AWS::EMR::Studio
+    DependsOn: emrStudioServicePolicy
+    Properties:
+      AuthMode: IAM
+      DefaultS3Location: !Join
+        - ''
+        - - s3://
+          - !Ref S3Bucket
+      Name: my-emr-studio
+      ServiceRole: !GetAtt emrStudioServiceRole.Arn
+      EngineSecurityGroupId: !Ref EMREngineSecurityGroup
+      WorkspaceSecurityGroupId: !Ref EMRWorkspaceSecurityGroup
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      VpcId: !Ref VPC
+  EMREngineSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow inbound traffic to EngineSecurityGroup (from notebook to cluster for port 18888)
+      GroupId: !Ref EMREngineSecurityGroup
+      SourceSecurityGroupId: !Ref EMRWorkspaceSecurityGroup
+      IpProtocol: tcp
+      FromPort: 18888
+      ToPort: 18888
+  EMRWorkspaceSecurityGroupEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: Allow outbound traffic from WorkspaceSecurityGroup (from notebook to cluster for port 18888)
+      GroupId: !Ref EMRWorkspaceSecurityGroup
+      DestinationSecurityGroupId: !Ref EMREngineSecurityGroup
+      IpProtocol: tcp
+      FromPort: 18888
+      ToPort: 18888
+  emrServerlessApplication:
+    Type: AWS::EMRServerless::Application
+    Properties:
+      Architecture: X86_64
+      Name: my-serverless-application
+      AutoStartConfiguration:
+        Enabled: true
+      AutoStopConfiguration:
+        Enabled: true
+        IdleTimeoutMinutes: 15
+      NetworkConfiguration:
+        SecurityGroupIds:
+          - !Ref EMRServerlessSG
+        SubnetIds:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
+      ReleaseLabel: emr-7.1.0
+      Type: Spark
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.192.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref EnvironmentName
+              - vpc
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref EnvironmentName
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    DependsOn: VPC
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs ''
+      CidrBlock: 10.192.10.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref EnvironmentName
+              - subnet
+              - public1
+              - !Select
+                - 0
+                - !GetAZs ''
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    DependsOn: VPC
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select
+        - 1
+        - !GetAZs ''
+      CidrBlock: 10.192.11.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref EnvironmentName
+              - subnet
+              - public2
+              - !Select
+                - 1
+                - !GetAZs ''
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    DependsOn: VPC
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs ''
+      CidrBlock: 10.192.20.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref EnvironmentName
+              - subnet
+              - private1
+              - !Select
+                - 0
+                - !GetAZs ''
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    DependsOn: VPC
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select
+        - 1
+        - !GetAZs ''
+      CidrBlock: 10.192.21.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref EnvironmentName
+              - subnet
+              - private2
+              - !Select
+                - 1
+                - !GetAZs ''
+  NatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+  NatGateway2EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+  NatGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway2EIP.AllocationId
+      SubnetId: !Ref PublicSubnet2
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Public Routes
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+  DefaultPrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway1
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet1
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+  DefaultPrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway2
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet2
+  EMRServerlessSG:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn: VPC
+    Properties:
+      GroupName: emr-serverless-sg
+      GroupDescription: Security group for EMRServerless
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 0
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPC
+  S3VPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      RouteTableIds:
+        - !Ref PrivateRouteTable1
+        - !Ref PrivateRouteTable2
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref VPC
+  KinesisDataGeneratorSecret:
+    Type: AWS::SecretsManager::Secret
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Name: KinesisDataGeneratorUser
+      Description: Secret for the Cognito User for the Kinesis Data Generator
+      SecretString: !Sub '{ "username": "${Username}", "password": "${Password}" }'
+  StagingLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      PermissionsBoundary: !If
+        - SetPermissionsBoundary
+        - !Ref PermissionsBoundaryArn
+        - !Ref AWS::NoValue
+      Path: /
+      Policies:
+        - PolicyName: BootStrapLambdaSetup
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub arn:${AWS::Partition}:logs:*:*:log-group:/aws/lambda/bootstrapStagingLambdaSetup*
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource:
+                  - !Sub ${StagingS3Bucket.Arn}/*
+  StagingS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+  StagingLambdaFunc:
+    Type: AWS::Lambda::Function
+    DependsOn: StagingS3Bucket
+    Properties:
+      FunctionName: bootstrapStagingLambdaSetup
+      Description: Staging Lambda to pull the zip dependency from GitHub to build the "real" setup function
+      Role: !GetAtt StagingLambdaRole.Arn
+      Runtime: python3.9
+      Timeout: 60
+      Handler: index.handler
+      Code:
+        ZipFile: |
+          import json
+          import urllib3
+          import boto3
+          import cfnresponse
+          import hashlib
+          import time
+          def stage_resources(event, context):
+              #if True:  # Testing hook to be able to stage out of band ZIP files
+              #  time.sleep(50)  # Watch timeout setting + Initialization
+              #  return
+              http = urllib3.PoolManager()
+              rsc_props = event['ResourceProperties']
+              bucket = rsc_props['StagingS3BucketName']
+              url_to_fetch = rsc_props['UrlLambdaZipToStage']
+              filename_key = rsc_props['FilenameKey']
+              expected_sha = rsc_props['Expected512Sha']
+              print(f'About to fetch URL: {url_to_fetch}')
+              resp = http.request('GET', url_to_fetch)
+              print('Done with fetch from URL.')
+              m = hashlib.sha512()
+              print('Hash complete.')
+              m.update(resp.data)
+              if expected_sha != m.hexdigest():
+                print(f'downloaded checksum does not match baseline. Expected[{expected_sha}], Got[{m.hexdigest()}]')
+                raise RunTimeError(f'downloaded checksum does not match baseline. Expected[{expected_sha}], Got[{m.hexdigest()}]')
+              print(f'About to put file to S3: {bucket}/{filename_key}')
+              s3 = boto3.client('s3')
+              resp = s3.put_object(
+                  Bucket=bucket,
+                  Key=filename_key,
+                  Body=resp.data,
+              )
+          def handler(event, context):
+              print(json.dumps(event))
+              was_i_successful = cfnresponse.FAILED
+              try:
+                  if event['RequestType'] == 'Create':
+                      print('creating')
+                      stage_resources(event, context)
+                  elif event['RequestType'] == 'Update':
+                      pass
+                  elif event['RequestType'] == 'Delete':
+                      pass
+                  was_i_successful = cfnresponse.SUCCESS
+              except Exception as e:
+                  print('exception thrown')
+                  print(e)
+              print(f'CFN Response: {was_i_successful}')
+              cfnresponse.send(event, context, was_i_successful, {})
+  ExecuteBootstrapStagingLambdaFuncCustom:
+    Type: Custom::BootstrapStagingLambdaFunc
+    Properties:
+      ServiceToken: !GetAtt StagingLambdaFunc.Arn
+      StagingS3BucketName: !Ref StagingS3Bucket
+      UrlLambdaZipToStage: https://github.com/awslabs/amazon-kinesis-data-generator/blob/mainline/setup/datagen-cognito-setup.zip?raw=true
+      FilenameKey: datagen-cognito-setup.zip
+      Expected512Sha: 779f78833de27c4523d27b0f792c7d3be7070fbe4bca76d480af2cb030049601e0081d44712c420e972c4bb9546c4167368671135ea0e62fe7d5d026eea584f6
+  DataGenCognitoSetupLambdaFunc:
+    Type: AWS::Lambda::Function
+    DependsOn: ExecuteBootstrapStagingLambdaFuncCustom
+    Properties:
+      Code:
+        S3Bucket: !Ref StagingS3Bucket
+        S3Key: datagen-cognito-setup.zip
+      Description: Creates a Cognito User Pool, Identity Pool, and a User.  Returns IDs to be used in the Kinesis Data Generator.
+      FunctionName: KinesisDataGeneratorCognitoSetup
+      Handler: createCognitoPool.createPoolAndUser
+      Role: !GetAtt SetupLambdaExecutionRole.Arn
+      Runtime: nodejs18.x
+      Timeout: 120
+  SetupLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      PermissionsBoundary: !If
+        - SetPermissionsBoundary
+        - !Ref PermissionsBoundaryArn
+        - !Ref AWS::NoValue
+      Path: /
+      Policies:
+        - PolicyName: SetupCognitoLambda
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub arn:${AWS::Partition}:logs:*:*:log-group:/aws/lambda/KinesisDataGeneratorCognitoSetup*
+              - Effect: Allow
+                Action:
+                  - cognito-idp:AdminConfirmSignUp
+                  - cognito-idp:CreateUserPoolClient
+                  - cognito-idp:AdminCreateUser
+                Resource:
+                  - !Sub arn:${AWS::Partition}:cognito-idp:*:*:userpool/*
+              - Effect: Allow
+                Action:
+                  - cognito-idp:CreateUserPool
+                  - cognito-identity:CreateIdentityPool
+                  - cognito-identity:SetIdentityPoolRoles
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:UpdateAssumeRolePolicy
+                Resource:
+                  - !GetAtt AuthenticatedUserRole.Arn
+                  - !GetAtt UnauthenticatedUserRole.Arn
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource:
+                  - !GetAtt AuthenticatedUserRole.Arn
+                  - !GetAtt UnauthenticatedUserRole.Arn
+  SetupCognitoCustom:
+    Type: Custom::DataGenCognitoSetupLambdaFunc
+    Properties:
+      ServiceToken: !GetAtt DataGenCognitoSetupLambdaFunc.Arn
+      Region: !Ref AWS::Region
+      Username: !Ref Username
+      Password: !Ref Password
+      AuthRoleName: !Ref AuthenticatedUserRole
+      AuthRoleArn: !GetAtt AuthenticatedUserRole.Arn
+      UnauthRoleName: !Ref UnauthenticatedUserRole
+      UnauthRoleArn: !GetAtt UnauthenticatedUserRole.Arn
+      Partition: !Ref AWS::Partition
+  AuthenticatedUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated:
+                - !FindInMap
+                  - PrincipalMap
+                  - !Ref AWS::Partition
+                  - cognito
+            Action:
+              - sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                cognito-identity.amazonaws.com:aud: !Ref AWS::StackId
+      PermissionsBoundary: !If
+        - SetPermissionsBoundary
+        - !Ref PermissionsBoundaryArn
+        - !Ref AWS::NoValue
+      Path: /
+      Policies:
+        - PolicyName: AllowStreaming
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - kinesis:DescribeStream
+                  - kinesis:PutRecord
+                  - kinesis:PutRecords
+                Resource:
+                  - !Sub arn:${AWS::Partition}:kinesis:*:*:stream/*
+                Effect: Allow
+              - Action:
+                  - firehose:DescribeDeliveryStream
+                  - firehose:PutRecord
+                  - firehose:PutRecordBatch
+                Resource:
+                  - !Sub arn:${AWS::Partition}:firehose:*:*:deliverystream/*
+                Effect: Allow
+              - Action:
+                  - ec2:DescribeRegions
+                  - firehose:ListDeliveryStreams
+                  - kinesis:ListStreams
+                Resource:
+                  - '*'
+                Effect: Allow
+  UnauthenticatedUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated:
+                - !FindInMap
+                  - PrincipalMap
+                  - !Ref AWS::Partition
+                  - cognito
+            Action:
+              - sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                cognito-identity.amazonaws.com:aud: !Ref AWS::StackId
+      PermissionsBoundary: !If
+        - SetPermissionsBoundary
+        - !Ref PermissionsBoundaryArn
+        - !Ref AWS::NoValue
+      Path: /
+      Policies:
+        - PolicyName: DenyAll
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Deny
+                Action:
+                  - '*'
+                Resource:
+                  - '*'
+Outputs:
+  KinesisDataGeneratorUrl:
+    Description: The URL for your Kinesis Data Generator.
+    Value: !Sub https://awslabs.github.io/amazon-kinesis-data-generator/web/producer.html?${SetupCognitoCustom.Querystring}
+  KinesisDataGeneratorCognitoUser:
+    Description: We saved your Cognito user/password in AWS Secrets
+    Value: !Ref KinesisDataGeneratorSecret
+  KinesisDataStreamName:
+    Description: The name of your Kinesis Data Streams stream to use in the Kinesis Data Generator
+    Value: !Ref KinesisDataStream
+  YourS3DataBucketName:
+    Description: S3 Bucket
+    Value: !Ref S3Bucket
+  emrServerlessRunTimeRole:
+    Value: !Ref emrServerlessRunTimeRole
+  emrStudioServiceRole:
+    Value: !Ref emrStudioServiceRole
+  VPC:
+    Value: !Ref VPC
+  PrivateSubnet1:
+    Value: !Ref PrivateSubnet1
+  PrivateSubnet2:
+    Value: !Ref PrivateSubnet2
