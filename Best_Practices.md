@@ -1,4 +1,4 @@
-# EMR Serverless Overview
+# EMR Serverless Best Practices Summary
 
 ## Applications
 
