@@ -142,4 +142,4 @@ EMR Serverless provides one-click application UIs e.g. Spark Live UI for running
 
 [Amazon EMR Serverless now offers larger worker sizes, to run more compute and memory-intensive workloads](https://aws.amazon.com/blogs/big-data/amazon-emr-serverless-supports-larger-worker-sizes-to-run-more-compute-and-memory-intensive-workloads/). While traditional GP2 disks with 600 IOPS are well-suited for small to medium jobs under 10TB, the introduction of GP3 "Shuffle Optimized" disks with 3000 IOPS provides the perfect solution for larger workloads demanding high IOPS and throughput.
 
-For Spark jobs optimization recommendations, use EMR Advisor tool to identify and address performance bottlenecks and optimize resource utilization.
+For Spark jobs optimization recommendations, use [EMR Advisor tool](https://github.com/aws-samples/aws-emr-advisor) to identify and address performance bottlenecks and optimize resource utilization.
