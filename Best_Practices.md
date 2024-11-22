@@ -27,8 +27,6 @@ spark.emr-serverless.executor.memory=16G
 spark.emr-serverless.executor.disk=200G
 ```
     
-
-    
 #### Note: 
 Spark properties for worker sizes are recommended, even if you configure pre-initialized workers. This ensures that if the pre-initialized workers limit is reached, on-demand workers will be launched with the configured worker sizes, rather than default worker sizes.
 
@@ -50,7 +48,7 @@ Also, review EMR Serverless Shuffle Optimized Disks here, to see if it's your us
 #### Creating applications
 Pick a Release and Architecture (Graviton3 or x86_64). Graviton3 has 35% better price-performance so is recommended. In rare cases, some 3rd party libraries may not be compatible with Graviton3.
 
-#### Pre-initialized capacity: [is optional]. 
+#### Pre-initialized capacity: [is optional] 
 Use this option if you want workers to be readily available for jobs to start up in seconds. You will incur charges for these workers even when idle until the Application goes to 'Stopped' state, which is configured through the 'idleTimeout' property during application creation. When pre-initialized capacity is enabled, application is launched in a single-AZ, which means multi-AZ functionality would not be provided out-of-the-box.
 
 #### Enable pre-initialized capacity only if you have a strict SLA for jobs to startup in seconds
@@ -61,9 +59,11 @@ EMR Serverless applications are multi-AZ enabled out-of-the-box when pre-initial
 
 #### Disaster Recovery:
 
-Worker Failure - In case of a worker failure, EMR Serverless will automatically replace the failed worker with a new on-demand worker. In case of failure of a worker from pre-initialized capacity, EMR Serverless will replace the failed worker to meet the configured pre-initialized capacity.
+##### Worker Failure - 
+In case of a worker failure, EMR Serverless will automatically replace the failed worker with a new on-demand worker. In case of failure of a worker from pre-initialized capacity, EMR Serverless will replace the failed worker to meet the configured pre-initialized capacity.
 
-Region failure - Even though EMR Serverless is multi-AZ enabled out of the box, customers looking for resiliency to region failures can create the application in another region and submit jobs to it during region outages.
+##### Region failure - 
+Even though EMR Serverless is multi-AZ enabled out of the box, customers looking for resiliency to region failures can create the application in another region and submit jobs to it during region outages.
 
 #### Custom image settings: 
 You can use custom images to bake in files and application dependencies in the EMR image. This feature is not needed for including python packages or including custom JARs, both of which can be stored in S3 and specified during job submission. See Customizing an EMR Serverless image. For examples, see Using custom images with EMR Serverless.
@@ -79,6 +79,7 @@ Tags: Each application can be configured with tags that can be used for cost att
 #### Monitoring:
 
 You can use a Cloudwatch dashboard to monitor detailed application capacity usage and jobs in each state. See EMR Serverless CloudWatch Dashboard.
+
 With EMR release 7.1 and higher, you can also monitor detailed Spark engine metrics such as JVM heap memory, GC, shuffle information and many more, at a per-job level using Prometheus and Grafana. See Monitor Spark metrics with Amazon Managed Service for Prometheus
 Application Capacity Limits: An application scales automatically when jobs are submitted within the scaling boundaries defined e.g. an Application limit of 1000 vCPUs, 4000 GB RAM, 20000 GB Disk will allow the application to scale to that limit.
 
@@ -139,6 +140,6 @@ spark.executor.instances=10
 
 EMR Serverless provides one-click application UIs e.g. Spark Live UI for running jobs and Spark History Server for completed jobs, from the EMR Studio UI. Logs are stored for 30 days for free. You can store these logs in your S3 bucket as well as well as us KMS CMK keys to encrypt the logs. For more details, see Encrypting logs.
 
-Amazon EMR Serverless now offers larger worker sizes, to run more compute and memory-intensive [workloads] : (https://aws.amazon.com/blogs/big-data/amazon-emr-serverless-supports-larger-worker-sizes-to-run-more-compute-and-memory-intensive-workloads/). While traditional GP2 disks with 600 IOPS are well-suited for small to medium jobs under 10TB, the introduction of GP3 "Shuffle Optimized" disks with 3000 IOPS provides the perfect solution for larger workloads demanding high IOPS and throughput.
+(Amazon EMR Serverless now offers larger worker sizes, to run more compute and memory-intensive workloads) : [https://aws.amazon.com/blogs/big-data/amazon-emr-serverless-supports-larger-worker-sizes-to-run-more-compute-and-memory-intensive-workloads/]. While traditional GP2 disks with 600 IOPS are well-suited for small to medium jobs under 10TB, the introduction of GP3 "Shuffle Optimized" disks with 3000 IOPS provides the perfect solution for larger workloads demanding high IOPS and throughput.
 
 For Spark jobs optimization recommendations, use EMR Advisor tool to identify and address performance bottlenecks and optimize resource utilization.
