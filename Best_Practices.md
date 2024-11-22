@@ -140,6 +140,6 @@ spark.executor.instances=10
 
 EMR Serverless provides one-click application UIs e.g. Spark Live UI for running jobs and Spark History Server for completed jobs, from the EMR Studio UI. Logs are stored for 30 days for free. You can store these logs in your S3 bucket as well as well as us KMS CMK keys to encrypt the logs. For more details, see Encrypting logs.
 
-(Amazon EMR Serverless now offers larger worker sizes, to run more compute and memory-intensive workloads) : [https://aws.amazon.com/blogs/big-data/amazon-emr-serverless-supports-larger-worker-sizes-to-run-more-compute-and-memory-intensive-workloads/]. While traditional GP2 disks with 600 IOPS are well-suited for small to medium jobs under 10TB, the introduction of GP3 "Shuffle Optimized" disks with 3000 IOPS provides the perfect solution for larger workloads demanding high IOPS and throughput.
+[Amazon EMR Serverless now offers larger worker sizes, to run more compute and memory-intensive workloads](https://aws.amazon.com/blogs/big-data/amazon-emr-serverless-supports-larger-worker-sizes-to-run-more-compute-and-memory-intensive-workloads/). While traditional GP2 disks with 600 IOPS are well-suited for small to medium jobs under 10TB, the introduction of GP3 "Shuffle Optimized" disks with 3000 IOPS provides the perfect solution for larger workloads demanding high IOPS and throughput.
 
 For Spark jobs optimization recommendations, use EMR Advisor tool to identify and address performance bottlenecks and optimize resource utilization.
