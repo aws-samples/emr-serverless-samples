@@ -1,4 +1,4 @@
-ARG EMR_RELEASE=6.9.0
+ARG EMR_RELEASE=7.5.0
 
 FROM public.ecr.aws/emr-serverless/spark/emr-$EMR_RELEASE:latest
 
@@ -35,7 +35,7 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then curl "https://awscli.amazonaws.com/awsc
 RUN if [ "$TARGETARCH" != "amd64" ]; then yum install -y gcc python3-devel; fi
 
 # Upgrade pip first
-RUN python3 -m pip install -U pip
+# RUN python3 -m pip install -U pip
 
 # Enable Jupyter notebooks - can be used when running in a devcontainer or by exposing 8080 and running jupyter server
 ENV PATH "/home/hadoop/.local/bin:$PATH"
