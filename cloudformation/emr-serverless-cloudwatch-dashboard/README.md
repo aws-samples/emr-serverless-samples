@@ -93,7 +93,7 @@ The sample Cloudwatch Dashboard provides the following functionality:
 
 ![Screenshot of Job Metrics](images/job-metrics-breakdown.png "Job Metrics")
 
-- Job Woker Metrics - Driver
+- Job Worker Metrics - Driver
     - Timeline view of CPU Allocated and Used by each Job
     - Timeline view of Memory Allocated and Used by each Job
     - Timeline view of Storage Allocated and Used by each Job
@@ -102,7 +102,7 @@ The sample Cloudwatch Dashboard provides the following functionality:
 
 ![Screenshot of Job Worker Metrics - Driver](images/job_worker_metrics_Driver.jpg "Job Worker Metrics - Driver")
 
-- Job Woker Metrics - Executor
+- Job Worker Metrics - Executor
     - Timeline view of CPU Allocated and Used by each Job
     - Timeline view of Memory Allocated and Used by each Job
     - Timeline view of Storage Allocated and Used by each Job
