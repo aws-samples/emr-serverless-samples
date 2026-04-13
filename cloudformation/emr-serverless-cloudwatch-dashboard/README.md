@@ -18,7 +18,7 @@ Follow along below to see how to get started or see a full demo in the [walkthro
 2. Create a new stack by choosing: `Create Stack`
 3. Choose the option `Upload a template file` and upload the `emr_serverless_cloudwatch_dashboard.yaml` template
 4. In the next page, add a Stack name for the stack.
-5. In the Parameters section, put in the `Application ID` of the EMR Serverless application you want to monitor
+5. In the Parameters section, put in the `Application ID` and `Application Name` of the EMR Serverless application you want to monitor
 6. Choose `Create Stack` in the final page.
 
 **From the CLI:**
@@ -28,8 +28,9 @@ Alternatively, you can also deploy this dashboard using the CLI:
 ```
 aws cloudformation create-stack --region <region> \
     --stack-name emr-serverless-dashboard \
-    --template-body <file:///path/emr_serverless_cloudwatch_dashboard.yaml> \
-    --parameters ParameterKey=ApplicationID,ParameterValue=<Application Id>
+    --template-body file:///path/emr_serverless_cloudwatch_dashboard.yaml \
+    --parameters ParameterKey=ApplicationID,ParameterValue=<Application Id> \
+                 ParameterKey=ApplicationName,ParameterValue=<Application Name>
 ```
 
 Once the stack is created, you'll have a new CloudWatch Dashboard with the name `emr-serverless-dashboard-<APPLICATION_ID>` under Dashboards in the CloudWatch console at https://console.aws.amazon.com/cloudwatch/. 
@@ -197,7 +198,8 @@ Using the `APPLICATION_ID` variable above, create the corresponding dashboard.
 aws cloudformation create-stack \
     --stack-name emr-serverless-dashboard \
     --template-body file://emr_serverless_cloudwatch_dashboard.yaml \
-    --parameters ParameterKey=ApplicationID,ParameterValue=$APPLICATION_ID
+    --parameters ParameterKey=ApplicationID,ParameterValue=$APPLICATION_ID \
+                 ParameterKey=ApplicationName,ParameterValue=cloudwatch-dashboard-demo
 ```
 
 Go ahead and open your new dashboard:
