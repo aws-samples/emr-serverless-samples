@@ -1,0 +1,9 @@
+name: 'emrs_demo'
+version: '1.0.0'
+profile: 'emrs_demo'
+model-paths: ["models"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+models:
+  emrs_demo:
+    +materialized: view

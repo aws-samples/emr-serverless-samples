@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+dbt_project/target/
+dbt_project/logs/
+dbt_packages/
+.user.yml
