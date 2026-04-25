@@ -120,5 +120,5 @@ Longer-term we're also exploring contributing a `spark_connect` method to [`dbt-
 
 ## Credits
 
-- **Vikrant Kumar** — authored the gRPC channel interceptor (`emrs_custom_spark_connect`) and validated it with 90-minute and 2.5-hour long-query tests on EMR-S beta.
+- **Vikrant (AWS)** — authored the gRPC channel interceptor (`emrs_custom_spark_connect`) and validated it with 90-minute and 2.5-hour long-query tests on EMR-S beta.
 - This sample combines that library with a thin monkey-patch so stock PySpark clients (dbt, Jupyter, custom Python scripts) get transparent refresh with zero client-side code changes.
