@@ -33,7 +33,17 @@ Either via `~/.aws/credentials`, `AWS_PROFILE` env var, or instance/task role.
 
 ### 3. Make sure your EMR Serverless application has sessions enabled
 
-EMR Serverless applications created on **release 7.13 or later** have interactive sessions enabled by default. To confirm for an existing application:
+Interactive sessions must be enabled on the application. The simplest path is to create the application with `sessionEnabled=true`:
+
+```bash
+aws emr-serverless create-application \\
+    --name dbt-spark-connect \\
+    --release-label emr-7.13.0 \\
+    --type SPARK \\
+    --interactive-configuration '{"sessionEnabled":true}'
+```
+
+To verify on an existing application:
 
 ```bash
 aws emr-serverless get-application \\
@@ -41,7 +51,7 @@ aws emr-serverless get-application \\
     --query 'application.interactiveConfiguration'
 ```
 
-If the response does not show `"sessionEnabled": true`, update the application (it must be in `STOPPED` state) with the relevant AWS CLI or console flow before proceeding.
+If the response does not show `"sessionEnabled": true`, stop the application and run `update-application` with the same `--interactive-configuration '{"sessionEnabled":true}'` before proceeding.
 
 ### 4. Run dbt
 
