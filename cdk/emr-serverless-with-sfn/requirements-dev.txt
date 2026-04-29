@@ -1,2 +1,2 @@
-pytest==6.2.5
+pytest==9.0.3
 pyspark==3.4.1
