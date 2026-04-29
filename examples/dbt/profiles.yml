@@ -1,0 +1,8 @@
+emrs_demo:
+  target: dev
+  outputs:
+    dev:
+      type: spark
+      method: session
+      schema: default
+      host: localhost
