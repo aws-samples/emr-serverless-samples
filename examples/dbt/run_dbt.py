@@ -12,7 +12,7 @@ Usage:
         --region us-east-1
 
 Pre-requisites:
-    pip install dbt-core "dbt-spark[session]" "pyspark[connect]>=3.5" boto3
+    pip install dbt-core "dbt-spark[session]" "pyspark[connect]>=3.5,<4" boto3
     # If on Python 3.12+:
     pip install "setuptools<81"
 """

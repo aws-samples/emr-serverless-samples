@@ -22,7 +22,7 @@ The SparkConnect session stays alive across token rotations — no teardown, no 
 ### 1. Install dependencies
 
 ```bash
-pip install dbt-core "dbt-spark[session]" "pyspark[connect]>=3.5" boto3
+pip install dbt-core "dbt-spark[session]" "pyspark[connect]>=3.5,<4" boto3
 # Python 3.12+ also needs:
 pip install "setuptools<81"
 ```
