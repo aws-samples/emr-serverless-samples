@@ -3,7 +3,7 @@ run dbt against it with automatic token refresh, then tear down.
 
 This script demonstrates that stock dbt-core + dbt-spark works with EMR-S
 Spark Connect beyond the 1-hour auth token TTL, by importing a small
-monkey-patch shim (`emrs_sparkconnect_autopatch`) before dbt runs.
+patch shim (`emrs_sparkconnect_autopatch`) before dbt runs.
 
 Usage:
     python run_dbt.py \\
@@ -25,7 +25,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-# Install the monkey-patch before any pyspark Spark Connect session is built.
+# Install the patch before any pyspark Spark Connect session is built.
 import emrs_sparkconnect_autopatch  # noqa: E402, F401
 
 import boto3  # noqa: E402

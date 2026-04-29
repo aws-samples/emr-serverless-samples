@@ -1,10 +1,10 @@
-"""Monkey-patch pyspark's Spark Connect ChannelBuilder so every channel built
+"""Patch pyspark's Spark Connect ChannelBuilder so every channel built
 from a SPARK_REMOTE URL pointing at EMR Serverless gets the token-refresh
 interceptor attached automatically.
 
-Re-uses the interceptor implementation from `emrs_custom_spark_connect`
-(authored by Vikrant Kumar, bundled alongside this file for convenience until
-the upstream package is published).
+Re-uses the interceptor implementation from `emrs_custom_spark_connect`,
+bundled alongside this file for convenience until the upstream package is
+published.
 
 Usage (dbt or any stock Spark Connect client):
 

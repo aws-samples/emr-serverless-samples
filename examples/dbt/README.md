@@ -12,8 +12,8 @@ EMR Serverless sessions themselves live up to 24 hours — it's only the auth to
 
 Two small Python modules bundled in this example:
 
-1. **`emrs_custom_spark_connect/`** — a gRPC channel interceptor that, before each outbound RPC, checks token expiry and calls `GetSessionEndpoint` for a fresh token when needed. Authored by Vikrant Kumar (EMR Serverless team); re-used here and expected to be published as a standalone package in the future.
-2. **`emrs_sparkconnect_autopatch.py`** — a ~50-line monkey-patch that plugs the interceptor into PySpark's default Spark Connect channel builder, so stock clients like dbt (which don't know anything about EMR-S) get transparent token refresh just by importing this module.
+1. **`emrs_custom_spark_connect/`** — a gRPC channel interceptor that, before each outbound RPC, checks token expiry and calls `GetSessionEndpoint` for a fresh token when needed.
+2. **`emrs_sparkconnect_autopatch.py`** — a ~50-line patch that plugs the interceptor into PySpark's default Spark Connect channel builder, so stock clients like dbt (which don't know anything about EMR-S) get transparent token refresh just by importing this module.
 
 The SparkConnect session stays alive across token rotations — no teardown, no state loss. dbt-spark is stock, unmodified.
 
@@ -33,13 +33,15 @@ Either via `~/.aws/credentials`, `AWS_PROFILE` env var, or instance/task role.
 
 ### 3. Make sure your EMR Serverless application has sessions enabled
 
+EMR Serverless applications created on **release 7.13 or later** have interactive sessions enabled by default. To confirm for an existing application:
+
 ```bash
-aws emr-serverless update-application \\
+aws emr-serverless get-application \\
     --application-id <APP_ID> \\
-    --interactive-configuration '{"sessionEnabled":true}'
+    --query 'application.interactiveConfiguration'
 ```
 
-The application must be in `STOPPED` state to update this config.
+If the response does not show `"sessionEnabled": true`, update the application (it must be in `STOPPED` state) with the relevant AWS CLI or console flow before proceeding.
 
 ### 4. Run dbt
 
@@ -102,23 +104,12 @@ View materializations are unaffected.
 
 Without the autopatch shim, the same test fails at t+62 min with `StatusCode.UNKNOWN / "Stream removed" / "Received incorrect session identifier"`.
 
-## Upstream direction
-
-This sample uses a runtime monkey-patch because there is no official PySpark hook to inject a gRPC interceptor when building a Spark Connect channel from a `SPARK_REMOTE` URL. The `emrs_custom_spark_connect` module bundled here is expected to be published as a standalone package by the EMR Serverless team. Once that happens, this example will be updated to depend on the published package and drop the bundled copy.
-
-Longer-term we're also exploring contributing a `spark_connect` method to [`dbt-adapters`](https://github.com/dbt-labs/dbt-adapters) that accepts a channel builder natively, which would remove the need for monkey-patching.
-
 ## Files
 
 | File | Purpose |
 |---|---|
 | `emrs_custom_spark_connect/` | gRPC interceptor + Spark Connect session helper (bundled temporarily; will be a separate pip package) |
-| `emrs_sparkconnect_autopatch.py` | Monkey-patch that plugs the interceptor into stock PySpark |
+| `emrs_sparkconnect_autopatch.py` | Patch that plugs the interceptor into stock PySpark |
 | `run_dbt.py` | End-to-end runner — starts session, runs dbt, tears down |
 | `profiles.yml` | Sample dbt profile (type: spark, method: session) |
 | `dbt_project/` | Minimal dbt project with one view model |
-
-## Credits
-
-- **Vikrant (AWS)** — authored the gRPC channel interceptor (`emrs_custom_spark_connect`) and validated it with 90-minute and 2.5-hour long-query tests on EMR-S beta.
-- This sample combines that library with a thin monkey-patch so stock PySpark clients (dbt, Jupyter, custom Python scripts) get transparent refresh with zero client-side code changes.
