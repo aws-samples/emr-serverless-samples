@@ -12,7 +12,7 @@ delta-spark = "2.1.0"
 emr-cli = ">=0.0.16,<0.1.0"
 
 [tool.poetry.group.dev.dependencies]
-pyspark = "3.3.0"
+pyspark = "3.3.2"
 emr-cli = ">=0.0.16,<0.1.0"
 
 [build-system]
