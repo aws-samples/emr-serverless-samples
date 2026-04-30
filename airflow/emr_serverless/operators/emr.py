@@ -17,7 +17,7 @@
 # under the License.
 from __future__ import annotations
 
-import sys
+from functools import cached_property
 from typing import TYPE_CHECKING, Dict, Optional, Sequence
 from uuid import uuid4
 
@@ -29,14 +29,7 @@ from airflow.models import BaseOperator
 if TYPE_CHECKING:
     from airflow.utils.context import Context
 
-from airflow.compat.functools import cached_property
-
 DEFAULT_CONN_ID = "aws_default"
-
-if sys.version_info >= (3, 8):
-    from functools import cached_property
-else:
-    from cached_property import cached_property
 
 
 class EmrServerlessCreateApplicationOperator(BaseOperator):
