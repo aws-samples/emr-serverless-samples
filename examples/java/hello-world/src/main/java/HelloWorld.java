@@ -1,5 +1,3 @@
-package com.amazon.damon;
-
 import org.apache.spark.sql.SparkSession;
 
 
