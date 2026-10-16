@@ -31,7 +31,8 @@ aws s3 cp extreme_weather.py s3://${S3_BUCKET}/code/pyspark/
 aws emr-serverless create-application \
   --type SPARK \
   --name serverless-demo \
-  --release-label "emr-6.6.0" \
+  --region us-east-1 \
+  --release-label "emr-spark-8.1.0" \
     --initial-capacity '{
         "DRIVER": {
             "workerCount": 2,
@@ -74,7 +75,7 @@ export APPLICATION_ID=00et0dhmhuokmr09
 - Get the state of your application
 
 ```shell
-aws emr-serverless get-application \
+aws emr-serverless get-application --region us-east-1 \
     --application-id $APPLICATION_ID
 ```
 
@@ -82,6 +83,7 @@ Once your application is in `CREATED` state, you can go ahead and start it.
 
 ```shell
 aws emr-serverless start-application \
+    --region us-east-1 \
     --application-id $APPLICATION_ID
 ```
 
