@@ -131,6 +131,10 @@ Now you're ready to go! Check out the examples below.
 
   This sample script shows how to use Hive in EMR Serverless to query the same NOAA data.
 
+- [DuckDB on EMR Serverless](https://github.com/aws-samples/aws-emr-utilities/tree/main/examples/duckdb-on-emr-serverless)
+
+  Shows how to run single-node DuckDB SQL on Apache Iceberg tables from the EMR Serverless driver, with a TPC-DS comparison against Spark SQL on the same vCPUs.
+
 ### SDK Usage
 
 You can call [EMR Serverless APIs](https://docs.aws.amazon.com/emr-serverless/latest/APIReference/Welcome.html) using standard AWS SDKs. The examples below show how to do this.
